@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
+import { FocusService } from '../../services/focus.service';
 import { Espaco } from '../../models/espaco.model';
 import { TipoContrato } from '../../models/tipo-contrato.model';
 
@@ -44,7 +45,8 @@ export class CadastroTipoContrato implements OnInit {
 
   constructor(
     private espacoService: EspacoService,
-    private tipoContratoService: TipoContratoService
+    private tipoContratoService: TipoContratoService,
+    private focusService: FocusService
   ) {}
 
   ngOnInit() {
@@ -215,9 +217,6 @@ export class CadastroTipoContrato implements OnInit {
 
   // Método para focar no primeiro campo do formulário
   private focarPrimeiroCampo() {
-    const primeiroCampo = document.getElementById('espacoId') as HTMLSelectElement;
-    if (primeiroCampo) {
-      primeiroCampo.focus();
-    }
+    this.focusService.focusElement('espacoId');
   }
 }

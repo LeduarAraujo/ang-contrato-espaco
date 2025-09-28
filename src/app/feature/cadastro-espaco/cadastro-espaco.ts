@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EspacoService } from '../../services/espaco.service';
+import { FocusService } from '../../services/focus.service';
 import { Espaco } from '../../models/espaco.model';
 
 @Component({
@@ -30,7 +31,8 @@ export class CadastroEspaco implements OnInit {
   espacoOriginal: Espaco | null = null;
 
   constructor(
-    private espacoService: EspacoService
+    private espacoService: EspacoService,
+    private focusService: FocusService
   ) {}
 
   ngOnInit() {
@@ -239,9 +241,6 @@ export class CadastroEspaco implements OnInit {
 
   // Método para focar no primeiro campo do formulário
   private focarPrimeiroCampo() {
-    const primeiroCampo = document.getElementById('nome') as HTMLInputElement;
-    if (primeiroCampo) {
-      primeiroCampo.focus();
-    }
+    this.focusService.focusElement('nome');
   }
 }

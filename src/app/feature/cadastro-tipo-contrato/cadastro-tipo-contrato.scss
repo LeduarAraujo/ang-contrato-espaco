@@ -59,7 +59,8 @@
     font-size: 14px;
     transition: border-color 0.3s ease;
 
-    &:focus {
+    &:focus,
+    &.ios-fake-focus {
       outline: none;
       border-color: #3498db;
     }
