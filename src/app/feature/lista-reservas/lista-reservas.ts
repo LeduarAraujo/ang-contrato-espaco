@@ -26,7 +26,7 @@ export class ListaReservas implements OnInit {
   // Filtros
   filtroEspaco = signal<number | null>(null);
   filtroMes = signal<string>('');
-  filtroPagamento = signal<string>(''); // 'todos', 'integral', 'parcial'
+  filtroPagamento = signal<string>('todos'); // 'todos', 'integral', 'parcial'
 
   // Paginação
   paginaAtual = signal<number>(1);
@@ -217,7 +217,7 @@ export class ListaReservas implements OnInit {
   limparFiltros() {
     this.filtroEspaco.set(null);
     this.filtroMes.set('');
-    this.filtroPagamento.set('');
+    this.filtroPagamento.set('todos');
     this.paginaAtual.set(1);
   }
 
@@ -277,12 +277,15 @@ export class ListaReservas implements OnInit {
   async excluirReserva(reserva: Reserva) {
     if (confirm(`Tem certeza que deseja excluir a reserva de ${reserva.nomeCliente}?`)) {
       try {
-        await this.reservaService.excluirReserva(reserva.id!);
-        this.carregarReservas(); // Recarregar a lista
-        alert('Reserva excluída com sucesso!');
-      } catch (error) {
+        await this.reservaService.excluirReserva(reserva.id!).toPromise();
+        // Atualização otimista da lista local
+        this.reservas.set(this.reservas().filter(r => r.id !== reserva.id));
+        console.log('Reserva excluída com sucesso!');
+      } catch (error: any) {
         console.error('Erro ao excluir reserva:', error);
         alert('Erro ao excluir reserva. Tente novamente.');
+        // Em caso de erro, recarregar a lista para garantir consistência
+        this.carregarReservas();
       }
     }
   }
