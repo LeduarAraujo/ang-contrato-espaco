@@ -4,7 +4,7 @@
  */
 export const API_CONFIG = {
   // Base URL da API
-  BASE_URL: 'https://660087b3-d4a4-4e30-904c-97b8b084e4c7-00-3g0t9jwlf6x17.spock.replit.dev/api',
+  BASE_URL: 'https://c794ba48-ce78-46a7-8d5c-ed5e1d125727-00-1d73oozkigvdf.janeway.replit.dev/api',
 
   // Endpoints para Espaços
   ESPACOS: {
