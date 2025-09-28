@@ -1,0 +1,132 @@
+<div class="container">
+  <div class="header">
+    <h1>Consulta de Festas</h1>
+    <p>Visualize todas as festas agendadas e seus detalhes</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <button
+        class="btn btn-secondary"
+        [class.active]="filtroSemana()"
+        (click)="ativarFiltroSemana()"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ filtroSemana() ? 'Todas as Festas' : 'Festas da Semana' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Caixas de Texto das Festas da Semana -->
+  <div *ngIf="mostrarCaixasTexto()" class="caixas-texto-section">
+    <div class="section-header">
+      <h2>Festas da Semana - Caixas de Texto</h2>
+      <span class="total-count">{{ getFestasPorEspaco().length }} espaço(s) com festas</span>
+    </div>
+
+    <div *ngIf="getFestasPorEspaco().length === 0" class="empty-state">
+      <p>Nenhuma festa encontrada para esta semana.</p>
+    </div>
+
+    <div *ngIf="getFestasPorEspaco().length > 0" class="caixas-texto-grid">
+      <div *ngFor="let item of getFestasPorEspaco()" class="caixa-texto-card">
+        <div class="caixa-texto-header">
+          <h3>{{ item.espaco.nome }}</h3>
+          <button
+            class="btn btn-success btn-sm"
+            (click)="copiarTexto(item.espaco, item.festas)"
+            title="Copiar texto das festas"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 2H16C17.1046 2 18 2.89543 18 4V6C18 7.10457 17.1046 8 16 8H8C6.89543 8 6 7.10457 6 6V4C6 2.89543 6.89543 2 8 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Copiar
+          </button>
+        </div>
+        <div class="caixa-texto-content">
+          <pre>{{ gerarTextoFestas(item.espaco, item.festas) }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Festas -->
+  <div class="list-section">
+    <div class="section-header">
+      <h2>Festas Agendadas</h2>
+      <span class="total-count">{{ getRelatoriosFiltrados().length }} festa(s) encontrada(s)</span>
+    </div>
+
+    <div *ngIf="loading()" class="loading">
+      <p>Carregando festas...</p>
+    </div>
+
+    <div *ngIf="!loading() && getRelatoriosFiltrados().length === 0" class="empty-state">
+      <p>Nenhuma festa encontrada.</p>
+    </div>
+
+    <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0" class="festas-grid">
+      <div *ngFor="let relatorio of getRelatoriosFiltrados()" class="festa-card">
+        <!-- Cabeçalho do Card -->
+        <div class="festa-header">
+          <div class="festa-info">
+            <h3>{{ relatorio.nomeCliente }}</h3>
+            <div class="festa-details">
+              <span class="data-festa">{{ formatarDataComDiaSemana(relatorio.dataFesta) }}</span>
+              <span class="status-pagamento" [class]="getStatusPagamentoClass(relatorio)">
+                {{ getStatusPagamento(relatorio) }}
+              </span>
+            </div>
+          </div>
+          <button
+            class="btn btn-primary btn-sm"
+            (click)="alternarDetalhes(relatorio.id!)"
+            [title]="relatorioExpandido() === relatorio.id ? 'Ocultar detalhes' : 'Ver detalhes'"
+          >
+            <svg *ngIf="relatorioExpandido() !== relatorio.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg *ngIf="relatorioExpandido() === relatorio.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ relatorioExpandido() === relatorio.id ? 'Ocultar' : 'Detalhar' }}
+          </button>
+        </div>
+
+        <!-- Detalhes Expandidos -->
+        <div *ngIf="relatorioExpandido() === relatorio.id" class="festa-details-expanded">
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="label">CPF/CNPJ:</span>
+              <span class="value">{{ formatarCPF(relatorio.cpfCliente) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Horário:</span>
+              <span class="value">{{ relatorio.horaInicio }} - {{ relatorio.horaFim }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Valor:</span>
+              <span class="value valor">{{ formatarValor(relatorio.valorPago) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">ID do Relatório:</span>
+              <span class="value">{{ relatorio.id }}</span>
+            </div>
+            <div class="detail-item" *ngIf="relatorio.createdAt">
+              <span class="label">Gerado em:</span>
+              <span class="value">{{ relatorio.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
