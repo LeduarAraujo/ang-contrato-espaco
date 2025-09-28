@@ -15,6 +15,7 @@ export class CadastroEspaco implements OnInit {
   espacos = signal<Espaco[]>([]);
   loading = signal<boolean>(false);
   salvando = signal<boolean>(false);
+  editando = signal<boolean>(false);
 
   // Formulário
   novoEspaco: Espaco = {
@@ -26,6 +27,7 @@ export class CadastroEspaco implements OnInit {
 
   selectedFile: File | null = null;
   imagePreview: string | null = null;
+  espacoOriginal: Espaco | null = null;
 
   constructor(
     private espacoService: EspacoService
@@ -60,34 +62,46 @@ export class CadastroEspaco implements OnInit {
 
     this.salvando.set(true);
     try {
-      console.log('Iniciando salvamento do espaço:', this.novoEspaco.nome);
-      console.log('Arquivo selecionado:', this.selectedFile?.name || 'nenhum');
+      if (this.editando()) {
+        // Modo de edição
+        console.log('Iniciando atualização do espaço:', this.novoEspaco.nome);
 
-      // Usar o novo método que faz upload e cadastro em uma única requisição
-      const espacoSalvo = await this.espacoService.criarEspacoComImagem(
-        this.novoEspaco.nome,
-        this.selectedFile,
-        this.novoEspaco.nomeProprietario,
-        this.novoEspaco.cnpjProprietario
-      ).toPromise();
+        const espacoAtualizado = await this.espacoService.atualizarEspaco(
+          this.novoEspaco.id!,
+          this.novoEspaco
+        ).toPromise();
 
-      console.log('Espaço salvo com sucesso:', espacoSalvo);
+        console.log('Espaço atualizado com sucesso:', espacoAtualizado);
 
-      // A imagem já está salva na pasta assets/temp e o logoUrl já contém o caminho correto
+        // Atualizar a lista
+        this.espacos.set(this.espacos().map(e =>
+          e.id === this.novoEspaco.id ? espacoAtualizado! : e
+        ));
 
-      this.espacos.set([...this.espacos(), espacoSalvo!]);
+        console.log('Espaço atualizado com sucesso!');
+      } else {
+        // Modo de criação
+        console.log('Iniciando salvamento do espaço:', this.novoEspaco.nome);
+        console.log('Arquivo selecionado:', this.selectedFile?.name || 'nenhum');
+
+        // Usar o novo método que faz upload e cadastro em uma única requisição
+        const espacoSalvo = await this.espacoService.criarEspacoComImagem(
+          this.novoEspaco.nome,
+          this.selectedFile,
+          this.novoEspaco.nomeProprietario,
+          this.novoEspaco.cnpjProprietario
+        ).toPromise();
+
+        console.log('Espaço salvo com sucesso:', espacoSalvo);
+
+        this.espacos.set([...this.espacos(), espacoSalvo!]);
+
+        console.log('Espaço cadastrado com sucesso!');
+      }
 
       // Limpar formulário
-      this.novoEspaco = {
-        nome: '',
-        logoUrl: '',
-        nomeProprietario: '',
-        cnpjProprietario: ''
-      };
-      this.selectedFile = null;
-      this.imagePreview = null;
+      this.limparFormulario();
 
-      console.log('Espaço cadastrado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar espaço:', error);
       console.error('Detalhes do erro:', JSON.stringify(error, null, 2));
@@ -167,5 +181,67 @@ export class CadastroEspaco implements OnInit {
       return `data:${espaco.logoMimeType};base64,${espaco.logoData}`;
     }
     return null;
+  }
+
+  // Método para editar espaço
+  editarEspaco(espaco: Espaco) {
+    console.log('Editando espaço:', espaco);
+
+    // Salvar o espaço original para possível cancelamento
+    this.espacoOriginal = { ...espaco };
+
+    // Preencher o formulário com os dados do espaço
+    this.novoEspaco = {
+      id: espaco.id,
+      nome: espaco.nome,
+      logoUrl: espaco.logoUrl,
+      nomeProprietario: espaco.nomeProprietario || '',
+      cnpjProprietario: espaco.cnpjProprietario || ''
+    };
+
+    // Se o espaço tem logo, mostrar preview
+    if (espaco.logoData && espaco.logoMimeType) {
+      this.imagePreview = `data:${espaco.logoMimeType};base64,${espaco.logoData}`;
+    } else {
+      this.imagePreview = null;
+    }
+
+    this.selectedFile = null; // Limpar arquivo selecionado
+    this.editando.set(true);
+
+    // Focar no primeiro campo após um pequeno delay para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      this.focarPrimeiroCampo();
+    }, 100);
+  }
+
+  // Método para cancelar edição
+  cancelarEdicao() {
+    console.log('Cancelando edição');
+    this.limparFormulario();
+    this.editando.set(false);
+    this.espacoOriginal = null;
+  }
+
+  // Método para limpar formulário
+  private limparFormulario() {
+    this.novoEspaco = {
+      nome: '',
+      logoUrl: '',
+      nomeProprietario: '',
+      cnpjProprietario: ''
+    };
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.editando.set(false);
+    this.espacoOriginal = null;
+  }
+
+  // Método para focar no primeiro campo do formulário
+  private focarPrimeiroCampo() {
+    const primeiroCampo = document.getElementById('nome') as HTMLInputElement;
+    if (primeiroCampo) {
+      primeiroCampo.focus();
+    }
   }
 }

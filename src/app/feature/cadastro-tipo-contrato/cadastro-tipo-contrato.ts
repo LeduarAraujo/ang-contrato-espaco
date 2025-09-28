@@ -18,6 +18,7 @@ export class CadastroTipoContrato implements OnInit {
   tiposContrato = signal<TipoContrato[]>([]);
   loading = signal<boolean>(false);
   salvando = signal<boolean>(false);
+  editando = signal<boolean>(false);
 
   // Formulário
   novoTipoContrato: TipoContrato = {
@@ -27,6 +28,8 @@ export class CadastroTipoContrato implements OnInit {
     descricao: '',
     textoTemplate: ''
   };
+
+  tipoContratoOriginal: TipoContrato | null = null;
 
   // Placeholders disponíveis
   placeholders = [
@@ -107,19 +110,34 @@ export class CadastroTipoContrato implements OnInit {
 
     this.salvando.set(true);
     try {
-      const tipoContratoSalvo = await this.tipoContratoService.criarTipoContrato(this.novoTipoContrato).toPromise();
-      this.tiposContrato.set([...this.tiposContrato(), tipoContratoSalvo!]);
+      if (this.editando()) {
+        // Modo de edição
+        console.log('Iniciando atualização do tipo de contrato:', this.novoTipoContrato.titulo);
+
+        const tipoContratoAtualizado = await this.tipoContratoService.atualizarTipoContrato(
+          this.novoTipoContrato.id!,
+          this.novoTipoContrato
+        ).toPromise();
+
+        console.log('Tipo de contrato atualizado com sucesso:', tipoContratoAtualizado);
+
+        // Atualizar a lista
+        this.tiposContrato.set(this.tiposContrato().map(tc =>
+          tc.id === this.novoTipoContrato.id ? tipoContratoAtualizado! : tc
+        ));
+
+        console.log('Tipo de contrato atualizado com sucesso!');
+      } else {
+        // Modo de criação
+        const tipoContratoSalvo = await this.tipoContratoService.criarTipoContrato(this.novoTipoContrato).toPromise();
+        this.tiposContrato.set([...this.tiposContrato(), tipoContratoSalvo!]);
+
+        console.log('Tipo de contrato cadastrado com sucesso!');
+      }
 
       // Limpar formulário
-      this.novoTipoContrato = {
-        espacoId: 0,
-        tipo: 'CONTRATO',
-        titulo: '',
-        descricao: '',
-        textoTemplate: ''
-      };
+      this.limparFormulario();
 
-      console.log('Tipo de contrato cadastrado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar tipo de contrato:', error);
       console.error('Erro ao salvar tipo de contrato. Verifique se já não existe um template para este espaço e tipo.');
@@ -147,5 +165,59 @@ export class CadastroTipoContrato implements OnInit {
   getEspacoNome(espacoId: number): string {
     const espaco = this.espacos().find(e => e.id === espacoId);
     return espaco ? espaco.nome : 'Espaço não encontrado';
+  }
+
+  // Método para editar tipo de contrato
+  editarTipoContrato(tipoContrato: TipoContrato) {
+    console.log('Editando tipo de contrato:', tipoContrato);
+
+    // Salvar o tipo de contrato original para possível cancelamento
+    this.tipoContratoOriginal = { ...tipoContrato };
+
+    // Preencher o formulário com os dados do tipo de contrato
+    this.novoTipoContrato = {
+      id: tipoContrato.id,
+      espacoId: tipoContrato.espacoId,
+      tipo: tipoContrato.tipo,
+      titulo: tipoContrato.titulo,
+      descricao: tipoContrato.descricao || '',
+      textoTemplate: tipoContrato.textoTemplate
+    };
+
+    this.editando.set(true);
+
+    // Focar no primeiro campo após um pequeno delay para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      this.focarPrimeiroCampo();
+    }, 100);
+  }
+
+  // Método para cancelar edição
+  cancelarEdicao() {
+    console.log('Cancelando edição');
+    this.limparFormulario();
+    this.editando.set(false);
+    this.tipoContratoOriginal = null;
+  }
+
+  // Método para limpar formulário
+  private limparFormulario() {
+    this.novoTipoContrato = {
+      espacoId: 0,
+      tipo: 'CONTRATO',
+      titulo: '',
+      descricao: '',
+      textoTemplate: ''
+    };
+    this.editando.set(false);
+    this.tipoContratoOriginal = null;
+  }
+
+  // Método para focar no primeiro campo do formulário
+  private focarPrimeiroCampo() {
+    const primeiroCampo = document.getElementById('espacoId') as HTMLSelectElement;
+    if (primeiroCampo) {
+      primeiroCampo.focus();
+    }
   }
 }

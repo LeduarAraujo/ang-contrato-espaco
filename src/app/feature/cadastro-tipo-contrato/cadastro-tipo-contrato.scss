@@ -188,6 +188,50 @@
   margin-bottom: 15px;
 }
 
+.tipo-contrato-actions {
+  display: flex;
+  gap: 8px;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &.btn-primary {
+      background-color: #3182ce;
+      color: white;
+
+      &:hover {
+        background-color: #2c5aa0;
+      }
+    }
+
+    &.btn-danger {
+      background-color: #e53e3e;
+      color: white;
+
+      &:hover {
+        background-color: #c53030;
+      }
+    }
+  }
+}
+
 .tipo-contrato-info {
   flex: 1;
 

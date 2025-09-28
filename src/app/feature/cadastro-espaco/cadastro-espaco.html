@@ -4,9 +4,9 @@
     <p>Gerencie os espaços disponíveis para locação</p>
   </div>
 
-  <!-- Formulário de Cadastro -->
+  <!-- Formulário de Cadastro/Edição -->
   <div class="form-section">
-    <h2>Novo Espaço</h2>
+    <h2>{{ editando() ? 'Editar Espaço' : 'Novo Espaço' }}</h2>
     <form (ngSubmit)="salvarEspaco()" #espacoForm="ngForm">
       <div class="form-row">
         <div class="form-group">
@@ -81,15 +81,27 @@
           class="btn btn-primary"
           [disabled]="salvando() || !espacoForm.form.valid"
         >
-          <span *ngIf="salvando()">Salvando...</span>
+          <span *ngIf="salvando()">{{ editando() ? 'Atualizando...' : 'Salvando...' }}</span>
           <span *ngIf="!salvando()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16L21 8V19C21 20.1046 20.1046 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M17 21V13H7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M7 3V8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Salvar Espaço
+            {{ editando() ? 'Atualizar Espaço' : 'Salvar Espaço' }}
           </span>
+        </button>
+        <button
+          *ngIf="editando()"
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarEdicao()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Cancelar
         </button>
       </div>
     </form>
@@ -142,6 +154,16 @@
             </div>
           </div>
           <div class="espaco-actions">
+            <button
+              class="btn btn-primary btn-sm"
+              (click)="editarEspaco(espaco)"
+              title="Editar espaço"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
             <button
               class="btn btn-danger btn-sm"
               (click)="excluirEspaco(espaco.id!)"

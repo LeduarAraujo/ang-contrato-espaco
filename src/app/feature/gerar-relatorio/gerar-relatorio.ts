@@ -21,6 +21,7 @@ export class GerarRelatorio implements OnInit {
   relatorios = signal<Relatorio[]>([]);
   loading = signal<boolean>(false);
   salvando = signal<boolean>(false);
+  editando = signal<boolean>(false);
 
   // Formulário
   novoRelatorio: Relatorio = {
@@ -33,6 +34,8 @@ export class GerarRelatorio implements OnInit {
     valorPago: 0,
     valorIntegral: false
   };
+
+  relatorioOriginal: Relatorio | null = null;
 
   // Filtros
   espacoFiltro = signal<number>(0);
@@ -293,22 +296,34 @@ export class GerarRelatorio implements OnInit {
 
     this.salvando.set(true);
     try {
-      const relatorioSalvo = await this.relatorioService.criarRelatorio(this.novoRelatorio).toPromise();
-      this.relatorios.set([...this.relatorios(), relatorioSalvo!]);
+      if (this.editando()) {
+        // Modo de edição
+        console.log('Iniciando atualização do relatório:', this.novoRelatorio.nomeCliente);
+
+        const relatorioAtualizado = await this.relatorioService.atualizarRelatorio(
+          this.novoRelatorio.id!,
+          this.novoRelatorio
+        ).toPromise();
+
+        console.log('Relatório atualizado com sucesso:', relatorioAtualizado);
+
+        // Atualizar a lista
+        this.relatorios.set(this.relatorios().map(r =>
+          r.id === this.novoRelatorio.id ? relatorioAtualizado! : r
+        ));
+
+        console.log('Relatório atualizado com sucesso!');
+      } else {
+        // Modo de criação
+        const relatorioSalvo = await this.relatorioService.criarRelatorio(this.novoRelatorio).toPromise();
+        this.relatorios.set([...this.relatorios(), relatorioSalvo!]);
+
+        console.log('Relatório gerado com sucesso!');
+      }
 
       // Limpar formulário
-      this.novoRelatorio = {
-        tipoContratoId: 0,
-        nomeCliente: '',
-        cpfCliente: '',
-        dataFesta: '',
-        horaInicio: '',
-        horaFim: '',
-        valorPago: 0,
-        valorIntegral: false
-      };
+      this.limparFormulario();
 
-      console.log('Relatório gerado com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar relatório:', error);
       console.error('Erro ao salvar relatório.');
@@ -373,6 +388,66 @@ export class GerarRelatorio implements OnInit {
     } catch (error) {
       console.error('Erro ao baixar PDF:', error);
       console.error('Erro ao gerar PDF do relatório.');
+    }
+  }
+
+  // Método para editar relatório
+  editarRelatorio(relatorio: Relatorio) {
+    console.log('Editando relatório:', relatorio);
+
+    // Salvar o relatório original para possível cancelamento
+    this.relatorioOriginal = { ...relatorio };
+
+    // Preencher o formulário com os dados do relatório
+    this.novoRelatorio = {
+      id: relatorio.id,
+      tipoContratoId: relatorio.tipoContratoId,
+      nomeCliente: relatorio.nomeCliente,
+      cpfCliente: relatorio.cpfCliente,
+      dataFesta: relatorio.dataFesta,
+      horaInicio: relatorio.horaInicio,
+      horaFim: relatorio.horaFim,
+      valorPago: relatorio.valorPago,
+      valorIntegral: relatorio.valorIntegral
+    };
+
+    this.editando.set(true);
+
+    // Focar no primeiro campo após um pequeno delay para garantir que o DOM foi atualizado
+    setTimeout(() => {
+      this.focarPrimeiroCampo();
+    }, 100);
+  }
+
+  // Método para cancelar edição
+  cancelarEdicao() {
+    console.log('Cancelando edição');
+    this.limparFormulario();
+    this.editando.set(false);
+    this.relatorioOriginal = null;
+  }
+
+  // Método para limpar formulário
+  private limparFormulario() {
+    this.novoRelatorio = {
+      tipoContratoId: 0,
+      nomeCliente: '',
+      cpfCliente: '',
+      dataFesta: '',
+      horaInicio: '',
+      horaFim: '',
+      valorPago: 0,
+      valorIntegral: false
+    };
+    this.editando.set(false);
+    this.relatorioOriginal = null;
+  }
+
+  // Método para focar no primeiro campo do formulário
+  private focarPrimeiroCampo() {
+    const primeiroCampo = document.getElementById('tipoContratoId') as HTMLSelectElement;
+    if (primeiroCampo) {
+      primeiroCampo.focus();
     }
   }
 }
