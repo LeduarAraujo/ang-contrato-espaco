@@ -6,6 +6,64 @@
 
   <!-- Filtros -->
   <div class="filters-section">
+    <div class="filters-header">
+      <h3>Filtros</h3>
+      <button class="btn btn-secondary btn-sm" (click)="limparFiltros()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 6V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Limpar Filtros
+      </button>
+    </div>
+
+    <div class="filters-grid">
+      <!-- Filtro por Espaço -->
+      <div class="filter-group">
+        <label for="filtroEspaco">Espaço</label>
+        <select
+          id="filtroEspaco"
+          [(ngModel)]="filtroEspaco"
+          class="form-control"
+        >
+          <option [value]="null">Todos os espaços</option>
+          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+            {{ espaco.nome }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro por Mês -->
+      <div class="filter-group">
+        <label for="filtroMes">Mês</label>
+        <select
+          id="filtroMes"
+          [(ngModel)]="filtroMes"
+          class="form-control"
+        >
+          <option value="">Todos os meses</option>
+          <option *ngFor="let mes of getOpcoesMes()" [value]="mes">
+            {{ formatarMes(mes) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro por Pagamento -->
+      <div class="filter-group">
+        <label for="filtroPagamento">Pagamento</label>
+        <select
+          id="filtroPagamento"
+          [(ngModel)]="filtroPagamento"
+          class="form-control"
+        >
+          <option value="todos">Todos</option>
+          <option value="integral">Integral</option>
+          <option value="parcial">Parcial</option>
+        </select>
+      </div>
+    </div>
+
     <div class="filters-row">
       <button
         class="btn btn-secondary"
@@ -206,12 +264,13 @@
     </div>
 
     <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0" class="festas-grid">
-      <div *ngFor="let relatorio of getRelatoriosFiltrados()" class="festa-card">
+      <div *ngFor="let relatorio of getRelatoriosPaginados()" class="festa-card">
         <!-- Cabeçalho do Card -->
         <div class="festa-header">
           <div class="festa-info">
             <h3>{{ relatorio.nomeCliente }}</h3>
             <div class="festa-details">
+              <span class="espaco-festa">{{ getNomeEspaco(relatorio) }}</span>
               <span class="data-festa">{{ formatarDataComDiaSemana(relatorio.dataFesta) }}</span>
               <span class="status-pagamento" [class]="getStatusPagamentoClass(relatorio)">
                 {{ getStatusPagamento(relatorio) }}
@@ -258,6 +317,52 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0 && getTotalPaginas() > 1" class="pagination-section">
+      <div class="pagination-info">
+        <span>
+          Página {{ paginaAtual() }} de {{ getTotalPaginas() }}
+          ({{ getRelatoriosFiltrados().length }} festa(s) no total)
+        </span>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          class="btn btn-secondary btn-sm"
+          [disabled]="paginaAtual() === 1"
+          (click)="paginaAnterior()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Anterior
+        </button>
+
+        <div class="pagination-numbers">
+          <button
+            *ngFor="let pagina of getPaginas()"
+            class="btn btn-sm"
+            [class.btn-primary]="pagina === paginaAtual()"
+            [class.btn-secondary]="pagina !== paginaAtual()"
+            (click)="irParaPagina(pagina)"
+          >
+            {{ pagina }}
+          </button>
+        </div>
+
+        <button
+          class="btn btn-secondary btn-sm"
+          [disabled]="paginaAtual() === getTotalPaginas()"
+          (click)="proximaPagina()"
+        >
+          Próxima
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>

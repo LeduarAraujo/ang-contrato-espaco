@@ -28,6 +28,15 @@ export class ConsultaFestas implements OnInit {
   mostrarDatasDisponiveis = signal<boolean>(false);
   mostrarModalDatas = signal<boolean>(false);
 
+  // Novos filtros
+  filtroEspaco = signal<number | null>(null);
+  filtroMes = signal<string>('');
+  filtroPagamento = signal<string>(''); // 'todos', 'integral', 'parcial'
+
+  // Paginação
+  paginaAtual = signal<number>(1);
+  itensPorPagina = signal<number>(5);
+
   // Configurações do modal de datas
   dataInicio = signal<string>('');
   dataFim = signal<string>('');
@@ -79,8 +88,24 @@ export class ConsultaFestas implements OnInit {
   getRelatoriosFiltrados(): Relatorio[] {
     let relatorios = this.relatorios();
 
+    // Filtro por semana
     if (this.filtroSemana()) {
       relatorios = this.filtrarFestasDaSemana(relatorios);
+    }
+
+    // Filtro por espaço
+    if (this.filtroEspaco()) {
+      relatorios = this.filtrarPorEspaco(relatorios, this.filtroEspaco()!);
+    }
+
+    // Filtro por mês
+    if (this.filtroMes()) {
+      relatorios = this.filtrarPorMes(relatorios, this.filtroMes()!);
+    }
+
+    // Filtro por pagamento
+    if (this.filtroPagamento() && this.filtroPagamento() !== 'todos') {
+      relatorios = this.filtrarPorPagamento(relatorios, this.filtroPagamento()!);
     }
 
     // Ordenar por data da festa
@@ -391,5 +416,122 @@ export class ConsultaFestas implements OnInit {
       console.error('Erro ao copiar texto:', error);
       this.copiarTextoFallback(texto);
     }
+  }
+
+  // Métodos de filtro
+  filtrarPorEspaco(relatorios: Relatorio[], espacoId: number): Relatorio[] {
+    return relatorios.filter(relatorio => {
+      const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
+      return tipoContrato && tipoContrato.espacoId === espacoId;
+    });
+  }
+
+  filtrarPorMes(relatorios: Relatorio[], mesAno: string): Relatorio[] {
+    const [mes, ano] = mesAno.split('/').map(Number);
+    return relatorios.filter(relatorio => {
+      const dataFesta = new Date(relatorio.dataFesta);
+      return dataFesta.getMonth() + 1 === mes && dataFesta.getFullYear() === ano;
+    });
+  }
+
+  filtrarPorPagamento(relatorios: Relatorio[], tipoPagamento: string): Relatorio[] {
+    return relatorios.filter(relatorio => {
+      if (tipoPagamento === 'integral') {
+        return relatorio.valorIntegral;
+      } else if (tipoPagamento === 'parcial') {
+        return !relatorio.valorIntegral;
+      }
+      return true;
+    });
+  }
+
+  // Métodos de paginação
+  getRelatoriosPaginados(): Relatorio[] {
+    const relatoriosFiltrados = this.getRelatoriosFiltrados();
+    const inicio = (this.paginaAtual() - 1) * this.itensPorPagina();
+    const fim = inicio + this.itensPorPagina();
+    return relatoriosFiltrados.slice(inicio, fim);
+  }
+
+  getTotalPaginas(): number {
+    const totalItens = this.getRelatoriosFiltrados().length;
+    return Math.ceil(totalItens / this.itensPorPagina());
+  }
+
+  getPaginas(): number[] {
+    const totalPaginas = this.getTotalPaginas();
+    const paginas: number[] = [];
+    for (let i = 1; i <= totalPaginas; i++) {
+      paginas.push(i);
+    }
+    return paginas;
+  }
+
+  irParaPagina(pagina: number) {
+    const totalPaginas = this.getTotalPaginas();
+    if (pagina >= 1 && pagina <= totalPaginas) {
+      this.paginaAtual.set(pagina);
+    }
+  }
+
+  paginaAnterior() {
+    if (this.paginaAtual() > 1) {
+      this.paginaAtual.set(this.paginaAtual() - 1);
+    }
+  }
+
+  proximaPagina() {
+    const totalPaginas = this.getTotalPaginas();
+    if (this.paginaAtual() < totalPaginas) {
+      this.paginaAtual.set(this.paginaAtual() + 1);
+    }
+  }
+
+  // Métodos para resetar filtros
+  limparFiltros() {
+    this.filtroEspaco.set(null);
+    this.filtroMes.set('');
+    this.filtroPagamento.set('');
+    this.paginaAtual.set(1);
+  }
+
+  // Método para obter nome do espaço
+  getNomeEspaco(relatorio: Relatorio): string {
+    const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
+    if (tipoContrato) {
+      const espaco = this.espacos().find(e => e.id === tipoContrato.espacoId);
+      return espaco ? espaco.nome : 'Espaço não encontrado';
+    }
+    return 'Espaço não encontrado';
+  }
+
+  // Método para obter opções de mês
+  getOpcoesMes(): string[] {
+    const meses: string[] = [];
+    const relatorios = this.relatorios();
+
+    relatorios.forEach(relatorio => {
+      const dataFesta = new Date(relatorio.dataFesta);
+      const mesAno = `${dataFesta.getMonth() + 1}/${dataFesta.getFullYear()}`;
+      if (!meses.includes(mesAno)) {
+        meses.push(mesAno);
+      }
+    });
+
+    return meses.sort((a, b) => {
+      const [mesA, anoA] = a.split('/').map(Number);
+      const [mesB, anoB] = b.split('/').map(Number);
+      return anoA - anoB || mesA - mesB;
+    });
+  }
+
+  // Método para formatar mês para exibição
+  formatarMes(mesAno: string): string {
+    const [mes, ano] = mesAno.split('/').map(Number);
+    const nomesMeses = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    return `${nomesMeses[mes - 1]} ${ano}`;
   }
 }
