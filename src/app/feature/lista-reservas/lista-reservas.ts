@@ -25,7 +25,7 @@ export class ListaReservas implements OnInit {
 
   // Filtros
   filtroEspaco = signal<number | null>(null);
-  filtroMes = signal<string>('');
+  filtroMes = signal<string>('todos'); // 'todos' ou formato 'mes/ano'
   filtroPagamento = signal<string>('todos'); // 'todos', 'integral', 'parcial'
 
   // Paginação
@@ -84,7 +84,7 @@ export class ListaReservas implements OnInit {
     }
 
     // Filtro por mês
-    if (this.filtroMes()) {
+    if (this.filtroMes() && this.filtroMes() !== 'todos') {
       reservas = this.filtrarPorMes(reservas, this.filtroMes()!);
     }
 
@@ -155,7 +155,8 @@ export class ListaReservas implements OnInit {
   filtrarPorMes(reservas: Reserva[], mesAno: string): Reserva[] {
     const [mes, ano] = mesAno.split('/').map(Number);
     return reservas.filter(reserva => {
-      const dataFesta = new Date(reserva.dataFesta);
+      // Garantir que a data seja interpretada corretamente
+      const dataFesta = new Date(reserva.dataFesta + 'T00:00:00');
       return dataFesta.getMonth() + 1 === mes && dataFesta.getFullYear() === ano;
     });
   }
@@ -216,7 +217,7 @@ export class ListaReservas implements OnInit {
   // Métodos para resetar filtros
   limparFiltros() {
     this.filtroEspaco.set(null);
-    this.filtroMes.set('');
+    this.filtroMes.set('todos');
     this.filtroPagamento.set('todos');
     this.paginaAtual.set(1);
   }
@@ -229,18 +230,18 @@ export class ListaReservas implements OnInit {
 
   // Método para obter opções de mês
   getOpcoesMes(): string[] {
-    const meses: string[] = [];
+    const mesesSet = new Set<string>();
     const reservas = this.reservas();
 
     reservas.forEach(reserva => {
-      const dataFesta = new Date(reserva.dataFesta);
-      const mesAno = `${dataFesta.getMonth() + 1}/${dataFesta.getFullYear()}`;
-      if (!meses.includes(mesAno)) {
-        meses.push(mesAno);
-      }
+      // Garantir que a data seja interpretada corretamente
+      const dataFesta = new Date(reserva.dataFesta + 'T00:00:00');
+      const mesAno = `${String(dataFesta.getMonth() + 1).padStart(2, '0')}/${dataFesta.getFullYear()}`;
+      mesesSet.add(mesAno);
     });
 
-    return meses.sort((a, b) => {
+    // Converter para array e ordenar
+    return Array.from(mesesSet).sort((a, b) => {
       const [mesA, anoA] = a.split('/').map(Number);
       const [mesB, anoB] = b.split('/').map(Number);
       return anoA - anoB || mesA - mesB;

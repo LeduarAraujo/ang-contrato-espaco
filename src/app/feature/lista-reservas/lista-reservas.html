@@ -42,7 +42,7 @@
           [(ngModel)]="filtroMes"
           class="form-control"
         >
-          <option value="">Todos os meses</option>
+          <option value="todos">Todos os meses</option>
           <option *ngFor="let mes of getOpcoesMes()" [value]="mes">
             {{ formatarMes(mes) }}
           </option>
