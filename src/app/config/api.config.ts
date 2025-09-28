@@ -4,7 +4,7 @@
  */
 export const API_CONFIG = {
   // Base URL da API
-  BASE_URL: 'https://42c88ed1-1083-4c7c-8bff-42de038165e9-00-1i94r1ycmvy9s.picard.replit.dev/api/',
+  BASE_URL: 'https://42c88ed1-1083-4c7c-8bff-42de038165e9-00-1i94r1ycmvy9s.picard.replit.dev/api',
 
   // Endpoints para Espaços
   ESPACOS: {
