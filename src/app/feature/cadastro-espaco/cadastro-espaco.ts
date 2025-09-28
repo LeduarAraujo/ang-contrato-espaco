@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EspacoService } from '../../services/espaco.service';
-import { FileService } from '../../services/file.service';
 import { Espaco } from '../../models/espaco.model';
 
 @Component({
@@ -24,10 +23,10 @@ export class CadastroEspaco implements OnInit {
   };
 
   selectedFile: File | null = null;
+  imagePreview: string | null = null;
 
   constructor(
-    private espacoService: EspacoService,
-    private fileService: FileService
+    private espacoService: EspacoService
   ) {}
 
   ngOnInit() {
@@ -38,7 +37,11 @@ export class CadastroEspaco implements OnInit {
     this.loading.set(true);
     try {
       const espacos = await this.espacoService.listarEspacos().toPromise();
-      this.espacos.set(espacos || []);
+      if (espacos) {
+        // As imagens agora são salvas diretamente na pasta assets/temp
+        // Não precisamos mais buscar via endpoint
+        this.espacos.set(espacos);
+      }
     } catch (error) {
       console.error('Erro ao carregar espaços:', error);
       console.error('Erro ao carregar espaços. Verifique se o backend está rodando.');
@@ -55,19 +58,18 @@ export class CadastroEspaco implements OnInit {
 
     this.salvando.set(true);
     try {
-      console.log('Iniciando salvamento do espaço:', this.novoEspaco);
+      console.log('Iniciando salvamento do espaço:', this.novoEspaco.nome);
+      console.log('Arquivo selecionado:', this.selectedFile?.name || 'nenhum');
 
-      // Se há um arquivo selecionado, fazer upload primeiro
-      if (this.selectedFile) {
-        console.log('Fazendo upload do arquivo:', this.selectedFile.name);
-        const fileUrl = await this.fileService.uploadFile(this.selectedFile).toPromise();
-        console.log('URL do arquivo recebida:', fileUrl);
-        this.novoEspaco.logoUrl = fileUrl!;
-      }
+      // Usar o novo método que faz upload e cadastro em uma única requisição
+      const espacoSalvo = await this.espacoService.criarEspacoComImagem(
+        this.novoEspaco.nome,
+        this.selectedFile
+      ).toPromise();
 
-      console.log('Enviando espaço para o backend:', this.novoEspaco);
-      const espacoSalvo = await this.espacoService.criarEspaco(this.novoEspaco).toPromise();
       console.log('Espaço salvo com sucesso:', espacoSalvo);
+
+      // A imagem já está salva na pasta assets/temp e o logoUrl já contém o caminho correto
 
       this.espacos.set([...this.espacos(), espacoSalvo!]);
 
@@ -77,6 +79,7 @@ export class CadastroEspaco implements OnInit {
         logoUrl: ''
       };
       this.selectedFile = null;
+      this.imagePreview = null;
 
       console.log('Espaço cadastrado com sucesso!');
     } catch (error) {
@@ -133,8 +136,8 @@ export class CadastroEspaco implements OnInit {
       // Criar URL temporária para preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        console.log('FileReader carregado, definindo logoUrl para preview');
-        this.novoEspaco.logoUrl = e.target.result;
+        console.log('FileReader carregado, definindo imagePreview');
+        this.imagePreview = e.target.result;
       };
       reader.readAsDataURL(file);
     } else {
@@ -144,5 +147,19 @@ export class CadastroEspaco implements OnInit {
 
   onImageError(event: any) {
     event.target.style.display = 'none';
+  }
+
+  removerImagem() {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    console.log('Imagem removida');
+  }
+
+  // Método para montar a URL da imagem usando logoMimeType e logoData
+  montarUrlImagem(espaco: Espaco): string | null {
+    if (espaco.logoData && espaco.logoMimeType) {
+      return `data:${espaco.logoMimeType};base64,${espaco.logoData}`;
+    }
+    return null;
   }
 }

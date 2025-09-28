@@ -25,7 +25,17 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "../atom-contrato-espaco/uploads",
+                "output": "uploads"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets/temp",
+                "output": "assets/temp"
+              }
             ],
             "styles": [
               "src/styles.scss"

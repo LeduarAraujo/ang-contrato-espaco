@@ -31,11 +31,32 @@ export class EspacoService {
     return this.http.post<Espaco>(getFullUrl(API_CONFIG.ESPACOS.CRIAR), espaco);
   }
 
+  criarEspacoComImagem(nome: string, logo: File | null): Observable<Espaco> {
+    console.log('EspacoService: Criando espaço com imagem:', nome);
+
+    const formData = new FormData();
+    formData.append('nome', nome);
+
+    if (logo) {
+      formData.append('logo', logo);
+      console.log('EspacoService: Arquivo adicionado ao FormData:', logo.name);
+    }
+
+    const url = getFullUrl(API_CONFIG.ESPACOS.CRIAR) + '/com-imagem';
+    console.log('EspacoService: URL de criação com imagem:', url);
+
+    return this.http.post<Espaco>(url, formData);
+  }
+
   atualizarEspaco(id: number, espaco: Espaco): Observable<Espaco> {
     return this.http.put<Espaco>(getFullUrl(API_CONFIG.ESPACOS.ATUALIZAR, { id }), espaco);
   }
 
   excluirEspaco(id: number): Observable<void> {
     return this.http.delete<void>(getFullUrl(API_CONFIG.ESPACOS.EXCLUIR, { id }));
+  }
+
+  buscarLogoBase64(id: number): Observable<string> {
+    return this.http.get<string>(getFullUrl(API_CONFIG.ESPACOS.BUSCAR, { id }) + '/logo');
   }
 }
