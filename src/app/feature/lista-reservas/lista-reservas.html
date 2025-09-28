@@ -28,7 +28,7 @@
           class="form-control"
         >
           <option [value]="null">Todos os espaços</option>
-          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+          <option *ngFor="let espaco of espacos()" [value]="espaco.id!.toString()">
             {{ espaco.nome }}
           </option>
         </select>

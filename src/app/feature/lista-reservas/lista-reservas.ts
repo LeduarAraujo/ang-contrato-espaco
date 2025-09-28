@@ -24,7 +24,7 @@ export class ListaReservas implements OnInit {
   reservaExpandida = signal<number | null>(null);
 
   // Filtros
-  filtroEspaco = signal<number | null>(null);
+  filtroEspaco = signal<number | string | null>(null);
   filtroMes = signal<string>('todos'); // 'todos' ou formato 'mes/ano'
   filtroPagamento = signal<string>('todos'); // 'todos', 'integral', 'parcial'
 
@@ -79,7 +79,7 @@ export class ListaReservas implements OnInit {
     let reservas = this.reservas();
 
     // Filtro por espaço
-    if (this.filtroEspaco()) {
+    if (this.filtroEspaco() && this.filtroEspaco() !== null && this.filtroEspaco() !== 'null') {
       reservas = this.filtrarPorEspaco(reservas, this.filtroEspaco()!);
     }
 
@@ -148,8 +148,10 @@ export class ListaReservas implements OnInit {
   }
 
   // Métodos de filtro
-  filtrarPorEspaco(reservas: Reserva[], espacoId: number): Reserva[] {
-    return reservas.filter(reserva => reserva.espacoId === espacoId);
+  filtrarPorEspaco(reservas: Reserva[], espacoId: number | string): Reserva[] {
+    // Garantir que ambos os valores sejam números para comparação correta
+    const espacoIdNum = Number(espacoId);
+    return reservas.filter(reserva => Number(reserva.espacoId) === espacoIdNum);
   }
 
   filtrarPorMes(reservas: Reserva[], mesAno: string): Reserva[] {
