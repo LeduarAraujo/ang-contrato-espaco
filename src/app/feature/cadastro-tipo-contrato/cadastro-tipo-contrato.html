@@ -40,18 +40,33 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="titulo">Título *</label>
-        <input
-          type="text"
-          id="titulo"
-          name="titulo"
-          [(ngModel)]="novoTipoContrato.titulo"
-          required
-          placeholder="Ex: Contrato de Locação, Recibo de Pagamento..."
-          class="form-control"
-        >
-        <small class="form-text">Este título aparecerá no topo do documento gerado</small>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="titulo">Título *</label>
+          <input
+            type="text"
+            id="titulo"
+            name="titulo"
+            [(ngModel)]="novoTipoContrato.titulo"
+            required
+            placeholder="Ex: Contrato de Locação, Recibo de Pagamento..."
+            class="form-control"
+          >
+          <small class="form-text">Este título aparecerá no topo do documento gerado</small>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao">Descrição</label>
+          <input
+            type="text"
+            id="descricao"
+            name="descricao"
+            [(ngModel)]="novoTipoContrato.descricao"
+            placeholder="Ex: 100%, 50%, Entrada, Final..."
+            class="form-control"
+          >
+          <small class="form-text">Use para diferenciar múltiplos contratos/recibos (ex: "100%" vs "50%")</small>
+        </div>
       </div>
 
       <div class="form-group">
@@ -116,6 +131,9 @@
               <span class="espaco-info">{{ getEspacoNome(tipoContrato.espacoId) }}</span>
               <span class="tipo-badge" [class.contrato]="tipoContrato.tipo === 'CONTRATO'" [class.recibo]="tipoContrato.tipo === 'RECIBO'">
                 {{ tipoContrato.tipo }}
+              </span>
+              <span *ngIf="tipoContrato.descricao" class="descricao-badge">
+                {{ tipoContrato.descricao }}
               </span>
             </div>
           </div>

@@ -24,6 +24,7 @@ export class CadastroTipoContrato implements OnInit {
     espacoId: 0,
     tipo: 'CONTRATO',
     titulo: '',
+    descricao: '',
     textoTemplate: ''
   };
 
@@ -114,6 +115,7 @@ export class CadastroTipoContrato implements OnInit {
         espacoId: 0,
         tipo: 'CONTRATO',
         titulo: '',
+        descricao: '',
         textoTemplate: ''
       };
 

@@ -20,7 +20,7 @@
           >
             <option value="0">Selecione um tipo de contrato</option>
             <option *ngFor="let tipoContrato of tiposContrato()" [value]="tipoContrato.id">
-              {{ getTipoContratoInfo(tipoContrato.id!).espaco }} - {{ tipoContrato.tipo }}
+              {{ getTipoContratoInfo(tipoContrato.id!).espaco }} - {{ tipoContrato.tipo }}{{ tipoContrato.descricao ? ' (' + tipoContrato.descricao + ')' : '' }}
             </option>
           </select>
         </div>
@@ -193,7 +193,7 @@
           <div class="relatorio-info">
             <h3>{{ relatorio.nomeCliente }}</h3>
             <span class="tipo-badge" [class.contrato]="getTipoContratoInfo(relatorio.tipoContratoId).tipo === 'CONTRATO'" [class.recibo]="getTipoContratoInfo(relatorio.tipoContratoId).tipo === 'RECIBO'">
-              {{ getTipoContratoInfo(relatorio.tipoContratoId).tipo }}
+              {{ getTipoContratoInfo(relatorio.tipoContratoId).tipo }}{{ getTipoContratoInfo(relatorio.tipoContratoId).descricao ? ' (' + getTipoContratoInfo(relatorio.tipoContratoId).descricao + ')' : '' }}
             </span>
           </div>
           <button

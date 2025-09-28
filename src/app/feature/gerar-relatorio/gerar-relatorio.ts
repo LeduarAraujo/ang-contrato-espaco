@@ -333,13 +333,14 @@ export class GerarRelatorio implements OnInit {
     }
   }
 
-  getTipoContratoInfo(tipoContratoId: number): { espaco: string, tipo: string } {
+  getTipoContratoInfo(tipoContratoId: number): { espaco: string, tipo: string, descricao?: string } {
     const tipoContrato = this.tiposContrato().find(tc => tc.id === tipoContratoId);
     if (tipoContrato) {
       const espaco = this.espacos().find(e => e.id === tipoContrato.espacoId);
       return {
         espaco: espaco ? espaco.nome : 'Espaço não encontrado',
-        tipo: tipoContrato.tipo
+        tipo: tipoContrato.tipo,
+        descricao: tipoContrato.descricao
       };
     }
     return { espaco: 'Não encontrado', tipo: 'Não encontrado' };

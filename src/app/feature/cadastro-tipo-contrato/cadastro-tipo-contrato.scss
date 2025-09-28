@@ -230,6 +230,17 @@
   }
 }
 
+.descricao-badge {
+  background: #f39c12;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .tipo-contrato-content {
   .template-preview {
     margin-bottom: 15px;
