@@ -241,7 +241,7 @@
         <button class="btn btn-secondary" (click)="fecharModalDatas()">
           Cancelar
         </button>
-        <button class="btn btn-primary" (click)="gerarRelatorioDatasDisponiveis()">
+        <button class="btn btn-primary" (click)="mostrarDatasDisponiveis.set(true); mostrarModalDatas.set(false)">
           Gerar Relatório
         </button>
       </div>
@@ -252,68 +252,72 @@
   <div class="list-section">
     <div class="section-header">
       <h2>Festas Agendadas</h2>
-      <span class="total-count">{{ getRelatoriosFiltrados().length }} festa(s) encontrada(s)</span>
+      <span class="total-count">{{ getReservasFiltradas().length }} festa(s) encontrada(s)</span>
     </div>
 
     <div *ngIf="loading()" class="loading">
       <p>Carregando festas...</p>
     </div>
 
-    <div *ngIf="!loading() && getRelatoriosFiltrados().length === 0" class="empty-state">
+    <div *ngIf="!loading() && getReservasFiltradas().length === 0" class="empty-state">
       <p>Nenhuma festa encontrada.</p>
     </div>
 
-    <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0" class="festas-grid">
-      <div *ngFor="let relatorio of getRelatoriosPaginados()" class="festa-card">
+    <div *ngIf="!loading() && getReservasFiltradas().length > 0" class="festas-grid">
+      <div *ngFor="let reserva of getReservasPaginadas()" class="festa-card">
         <!-- Cabeçalho do Card -->
         <div class="festa-header">
           <div class="festa-info">
-            <h3>{{ relatorio.nomeCliente }}</h3>
+            <h3>{{ reserva.nomeCliente }}</h3>
             <div class="festa-details">
-              <span class="espaco-festa">{{ getNomeEspaco(relatorio) }}</span>
-              <span class="data-festa">{{ formatarDataComDiaSemana(relatorio.dataFesta) }}</span>
-              <span class="status-pagamento" [class]="getStatusPagamentoClass(relatorio)">
-                {{ getStatusPagamento(relatorio) }}
+              <span class="espaco-festa">{{ getNomeEspaco(reserva) }}</span>
+              <span class="data-festa">{{ formatarDataComDiaSemana(reserva.dataFesta) }}</span>
+              <span class="status-pagamento" [class]="getStatusPagamentoClass(reserva)">
+                {{ getStatusPagamento(reserva) }}
               </span>
             </div>
           </div>
           <button
             class="btn btn-primary btn-sm"
-            (click)="alternarDetalhes(relatorio.id!)"
-            [title]="relatorioExpandido() === relatorio.id ? 'Ocultar detalhes' : 'Ver detalhes'"
+            (click)="alternarDetalhes(reserva.id!)"
+            [title]="reservaExpandida() === reserva.id ? 'Ocultar detalhes' : 'Ver detalhes'"
           >
-            <svg *ngIf="relatorioExpandido() !== relatorio.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg *ngIf="reservaExpandida() !== reserva.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <svg *ngIf="relatorioExpandido() === relatorio.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg *ngIf="reservaExpandida() === reserva.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            {{ relatorioExpandido() === relatorio.id ? 'Ocultar' : 'Detalhar' }}
+            {{ reservaExpandida() === reserva.id ? 'Ocultar' : 'Detalhar' }}
           </button>
         </div>
 
         <!-- Detalhes Expandidos -->
-        <div *ngIf="relatorioExpandido() === relatorio.id" class="festa-details-expanded">
+        <div *ngIf="reservaExpandida() === reserva.id" class="festa-details-expanded">
           <div class="details-grid">
             <div class="detail-item">
               <span class="label">CPF/CNPJ:</span>
-              <span class="value">{{ formatarCPF(relatorio.cpfCliente) }}</span>
+              <span class="value">{{ formatarCPF(reserva.cpfCliente) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Telefone:</span>
+              <span class="value">{{ reserva.telefoneCliente }}</span>
             </div>
             <div class="detail-item">
               <span class="label">Horário:</span>
-              <span class="value">{{ relatorio.horaInicio }} - {{ relatorio.horaFim }}</span>
+              <span class="value">{{ reserva.horaInicio }} - {{ reserva.horaFim }}</span>
             </div>
             <div class="detail-item">
               <span class="label">Valor:</span>
-              <span class="value valor">{{ formatarValor(relatorio.valorPago) }}</span>
+              <span class="value valor">{{ formatarValor(reserva.valorPagamento) }}</span>
             </div>
-            <div class="detail-item">
-              <span class="label">ID do Relatório:</span>
-              <span class="value">{{ relatorio.id }}</span>
+            <div class="detail-item" *ngIf="reserva.valorRestante && reserva.valorRestante > 0">
+              <span class="label">Valor Restante:</span>
+              <span class="value valor">{{ formatarValor(reserva.valorRestante) }}</span>
             </div>
-            <div class="detail-item" *ngIf="relatorio.createdAt">
-              <span class="label">Gerado em:</span>
-              <span class="value">{{ relatorio.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            <div class="detail-item" *ngIf="reserva.createdAt">
+              <span class="label">Criado em:</span>
+              <span class="value">{{ reserva.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
           </div>
         </div>
@@ -321,11 +325,11 @@
     </div>
 
     <!-- Paginação -->
-    <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0 && getTotalPaginas() > 1" class="pagination-section">
+    <div *ngIf="!loading() && getReservasFiltradas().length > 0 && getTotalPaginas() > 1" class="pagination-section">
       <div class="pagination-info">
         <span>
           Página {{ paginaAtual() }} de {{ getTotalPaginas() }}
-          ({{ getRelatoriosFiltrados().length }} festa(s) no total)
+          ({{ getReservasFiltradas().length }} festa(s) no total)
         </span>
       </div>
 

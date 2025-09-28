@@ -1,0 +1,79 @@
+<div class="gerar-pdf-container">
+  <div class="header">
+    <h1>Gerar Documento</h1>
+    <p>Selecione o tipo de documento que deseja gerar para esta reserva</p>
+  </div>
+
+  <div class="content">
+    <!-- Informações da Reserva -->
+    <div class="reserva-info" *ngIf="reserva()">
+      <h3>Informações da Reserva</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Cliente:</label>
+          <span>{{ reserva()?.nomeCliente }}</span>
+        </div>
+        <div class="info-item">
+          <label>CPF:</label>
+          <span>{{ reserva()?.cpfCliente }}</span>
+        </div>
+        <div class="info-item">
+          <label>Data da Festa:</label>
+          <span>{{ reserva()?.dataFesta }}</span>
+        </div>
+        <div class="info-item">
+          <label>Horário:</label>
+          <span>{{ reserva()?.horaInicio }} - {{ reserva()?.horaFim }}</span>
+        </div>
+        <div class="info-item">
+          <label>Valor:</label>
+          <span>R$ {{ reserva()?.valorPagamento | number:'1.2-2' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Pagamento:</label>
+          <span>{{ reserva()?.valorIntegral ? 'Integral' : 'Parcial' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seleção do Tipo de Contrato -->
+    <div class="form-section">
+      <h3>Selecione o Tipo de Documento</h3>
+      <div class="form-group">
+        <label for="tipoContrato">Tipo de Documento:</label>
+        <select
+          id="tipoContrato"
+          [(ngModel)]="tipoContratoSelecionado"
+          class="form-control"
+          [disabled]="loading()">
+          <option value="">Selecione um tipo...</option>
+          <option
+            *ngFor="let tipo of tiposContrato()"
+            [value]="tipo.id">
+            {{ tipo.titulo }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botões -->
+    <div class="actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="voltar()"
+        [disabled]="loading()">
+        Voltar
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="gerarPdf()"
+        [disabled]="loading() || !tipoContratoSelecionado()">
+        <span *ngIf="loading()">Gerando...</span>
+        <span *ngIf="!loading()">Gerar PDF</span>
+      </button>
+    </div>
+  </div>
+</div>
+

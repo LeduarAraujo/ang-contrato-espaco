@@ -1,0 +1,245 @@
+<div class="container">
+  <div class="header">
+    <h1>{{ modoEdicao() ? 'Editar Reserva' : 'Cadastro de Reserva' }}</h1>
+    <p>{{ modoEdicao() ? 'Edite os dados da reserva' : 'Preencha os dados para registrar uma nova reserva' }}</p>
+  </div>
+
+  <div class="form-container">
+    <form (ngSubmit)="salvarReserva()" #reservaForm="ngForm">
+
+      <!-- Seleção do Espaço -->
+      <div class="form-group">
+        <label for="espacoId" class="required">Espaço</label>
+        <select
+          id="espacoId"
+          name="espacoId"
+          [(ngModel)]="reserva.espacoId"
+          class="form-control"
+          [class.error]="erros()['espacoId']"
+          required
+        >
+          <option value="0">Selecione um espaço</option>
+          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+            {{ espaco.nome }}
+          </option>
+        </select>
+        <div *ngIf="erros()['espacoId']" class="error-message">
+          {{ erros()['espacoId'] }}
+        </div>
+      </div>
+
+      <!-- Dados do Cliente -->
+      <div class="form-section">
+        <h3>Dados do Cliente</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nomeCliente" class="required">Nome do Cliente</label>
+            <input
+              type="text"
+              id="nomeCliente"
+              name="nomeCliente"
+              [(ngModel)]="reserva.nomeCliente"
+              class="form-control"
+              [class.error]="erros()['nomeCliente']"
+              placeholder="Digite o nome completo do cliente"
+              required
+            >
+            <div *ngIf="erros()['nomeCliente']" class="error-message">
+              {{ erros()['nomeCliente'] }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cpfCliente" class="required">CPF/CNPJ</label>
+            <input
+              type="text"
+              id="cpfCliente"
+              name="cpfCliente"
+              [(ngModel)]="reserva.cpfCliente"
+              (input)="formatarCPF($event)"
+              class="form-control"
+              [class.error]="erros()['cpfCliente']"
+              placeholder="000.000.000-00"
+              maxlength="18"
+              required
+            >
+            <div *ngIf="erros()['cpfCliente']" class="error-message">
+              {{ erros()['cpfCliente'] }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="telefoneCliente" class="required">Telefone</label>
+          <input
+            type="text"
+            id="telefoneCliente"
+            name="telefoneCliente"
+            [(ngModel)]="reserva.telefoneCliente"
+            (input)="formatarTelefone($event)"
+            class="form-control"
+            [class.error]="erros()['telefoneCliente']"
+            placeholder="(00) 00000-0000"
+            maxlength="15"
+            required
+          >
+          <div *ngIf="erros()['telefoneCliente']" class="error-message">
+            {{ erros()['telefoneCliente'] }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados da Festa -->
+      <div class="form-section">
+        <h3>Dados da Festa</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dataFesta" class="required">Data da Festa</label>
+            <input
+              type="date"
+              id="dataFesta"
+              name="dataFesta"
+              [(ngModel)]="reserva.dataFesta"
+              class="form-control"
+              [class.error]="erros()['dataFesta']"
+              required
+            >
+            <div *ngIf="erros()['dataFesta']" class="error-message">
+              {{ erros()['dataFesta'] }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="horaInicio" class="required">Horário de Início</label>
+            <input
+              type="time"
+              id="horaInicio"
+              name="horaInicio"
+              [(ngModel)]="reserva.horaInicio"
+              class="form-control"
+              [class.error]="erros()['horaInicio']"
+              required
+            >
+            <div *ngIf="erros()['horaInicio']" class="error-message">
+              {{ erros()['horaInicio'] }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="horaFim" class="required">Horário de Fim</label>
+            <input
+              type="time"
+              id="horaFim"
+              name="horaFim"
+              [(ngModel)]="reserva.horaFim"
+              class="form-control"
+              [class.error]="erros()['horaFim']"
+              required
+            >
+            <div *ngIf="erros()['horaFim']" class="error-message">
+              {{ erros()['horaFim'] }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados do Pagamento -->
+      <div class="form-section">
+        <h3>Dados do Pagamento</h3>
+
+        <div class="form-group">
+          <label for="valorPagamento" class="required">Valor do Pagamento</label>
+          <input
+            type="number"
+            id="valorPagamento"
+            name="valorPagamento"
+            [(ngModel)]="reserva.valorPagamento"
+            (input)="onValorChange($event)"
+            class="form-control"
+            [class.error]="erros()['valorPagamento']"
+            min="0.01"
+            step="0.01"
+            placeholder="0,00"
+            required
+          >
+          <div *ngIf="reserva.valorPagamento > 0" class="valor-preview">
+            <small class="form-text">{{ formatarValorPorExtenso(reserva.valorPagamento) }}</small>
+          </div>
+          <div *ngIf="erros()['valorPagamento']" class="error-message">
+            {{ erros()['valorPagamento'] }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="radio-label">Tipo de Pagamento</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="valorIntegral"
+                [value]="true"
+                [(ngModel)]="reserva.valorIntegral"
+                (change)="onValorIntegralChange()"
+              >
+              <span class="radio-text">Valor Integral</span>
+            </label>
+            <label class="radio-option">
+              <input
+                type="radio"
+                name="valorIntegral"
+                [value]="false"
+                [(ngModel)]="reserva.valorIntegral"
+                (change)="onValorIntegralChange()"
+              >
+              <span class="radio-text">Valor Parcial</span>
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="!reserva.valorIntegral" class="form-group">
+          <label for="valorRestante" class="required">Valor Restante</label>
+          <input
+            type="number"
+            id="valorRestante"
+            name="valorRestante"
+            [(ngModel)]="reserva.valorRestante"
+            (input)="onValorRestanteChange($event)"
+            class="form-control"
+            [class.error]="erros()['valorRestante']"
+            min="0.01"
+            step="0.01"
+            placeholder="0,00"
+          >
+          <div *ngIf="reserva.valorRestante && reserva.valorRestante > 0" class="valor-preview">
+            <small class="form-text">{{ formatarValorPorExtenso(reserva.valorRestante) }}</small>
+          </div>
+          <div *ngIf="erros()['valorRestante']" class="error-message">
+            {{ erros()['valorRestante'] }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelar()"
+          [disabled]="salvando()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="salvando() || loading()"
+        >
+          <span *ngIf="salvando()" class="spinner"></span>
+          {{ salvando() ? 'Salvando...' : (modoEdicao() ? 'Atualizar Reserva' : 'Salvar Reserva') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

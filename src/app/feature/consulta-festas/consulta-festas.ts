@@ -1,10 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RelatorioService } from '../../services/relatorio.service';
+import { ReservaService } from '../../services/reserva.service';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
-import { Relatorio } from '../../models/relatorio.model';
+import { Reserva } from '../../models/reserva.model';
 import { Espaco } from '../../models/espaco.model';
 import { TipoContrato } from '../../models/tipo-contrato.model';
 
@@ -16,11 +16,11 @@ import { TipoContrato } from '../../models/tipo-contrato.model';
 })
 export class ConsultaFestas implements OnInit {
 
-  relatorios = signal<Relatorio[]>([]);
+  reservas = signal<Reserva[]>([]);
   espacos = signal<Espaco[]>([]);
   tiposContrato = signal<TipoContrato[]>([]);
   loading = signal<boolean>(false);
-  relatorioExpandido = signal<number | null>(null);
+  reservaExpandida = signal<number | null>(null);
 
   // Filtros
   filtroSemana = signal<boolean>(false);
@@ -31,7 +31,7 @@ export class ConsultaFestas implements OnInit {
   // Novos filtros
   filtroEspaco = signal<number | null>(null);
   filtroMes = signal<string>('');
-  filtroPagamento = signal<string>(''); // 'todos', 'integral', 'parcial'
+  filtroPagamento = signal<string>('todos'); // 'todos', 'integral', 'parcial'
 
   // Paginação
   paginaAtual = signal<number>(1);
@@ -43,29 +43,29 @@ export class ConsultaFestas implements OnInit {
   tipoDias = signal<'todos' | 'finais' | 'dias-semana'>('todos');
 
   constructor(
-    private relatorioService: RelatorioService,
+    private reservaService: ReservaService,
     private espacoService: EspacoService,
     private tipoContratoService: TipoContratoService
   ) {}
 
   ngOnInit() {
-    this.carregarRelatorios();
+    this.carregarReservas();
     this.carregarEspacos();
     this.carregarTiposContrato();
   }
 
-  async carregarRelatorios() {
+  async carregarReservas() {
     this.loading.set(true);
     try {
-      const relatorios = await this.relatorioService.listarRelatorios().toPromise();
-      this.relatorios.set(relatorios || []);
+      const reservas = await this.reservaService.listarReservas().toPromise();
+      this.reservas.set(reservas || []);
     } catch (error) {
-      console.error('Erro ao carregar relatórios:', error);
-      console.error('Erro ao carregar relatórios.');
+      console.error('Erro ao carregar reservas:', error);
     } finally {
       this.loading.set(false);
     }
   }
+
 
   async carregarEspacos() {
     try {
@@ -85,34 +85,34 @@ export class ConsultaFestas implements OnInit {
     }
   }
 
-  getRelatoriosFiltrados(): Relatorio[] {
-    let relatorios = this.relatorios();
+  getReservasFiltradas(): Reserva[] {
+    let reservas = this.reservas();
 
     // Filtro por semana
     if (this.filtroSemana()) {
-      relatorios = this.filtrarFestasDaSemana(relatorios);
+      reservas = this.filtrarFestasDaSemana(reservas);
     }
 
     // Filtro por espaço
     if (this.filtroEspaco()) {
-      relatorios = this.filtrarPorEspaco(relatorios, this.filtroEspaco()!);
+      reservas = this.filtrarPorEspaco(reservas, this.filtroEspaco()!);
     }
 
     // Filtro por mês
     if (this.filtroMes()) {
-      relatorios = this.filtrarPorMes(relatorios, this.filtroMes()!);
+      reservas = this.filtrarPorMes(reservas, this.filtroMes()!);
     }
 
     // Filtro por pagamento
     if (this.filtroPagamento() && this.filtroPagamento() !== 'todos') {
-      relatorios = this.filtrarPorPagamento(relatorios, this.filtroPagamento()!);
+      reservas = this.filtrarPorPagamento(reservas, this.filtroPagamento()!);
     }
 
     // Ordenar por data da festa
-    return relatorios.sort((a, b) => new Date(a.dataFesta).getTime() - new Date(b.dataFesta).getTime());
+    return reservas.sort((a, b) => new Date(a.dataFesta).getTime() - new Date(b.dataFesta).getTime());
   }
 
-  filtrarFestasDaSemana(relatorios: Relatorio[]): Relatorio[] {
+  filtrarFestasDaSemana(reservas: Reserva[]): Reserva[] {
     const hoje = new Date();
     const inicioSemana = new Date(hoje);
 
@@ -127,8 +127,8 @@ export class ConsultaFestas implements OnInit {
     fimSemana.setDate(inicioSemana.getDate() + 6); // Domingo (6 dias após segunda)
     fimSemana.setHours(23, 59, 59, 999);
 
-    return relatorios.filter(relatorio => {
-      const dataFesta = new Date(relatorio.dataFesta);
+    return reservas.filter(reserva => {
+      const dataFesta = new Date(reserva.dataFesta);
       return dataFesta >= inicioSemana && dataFesta <= fimSemana;
     });
   }
@@ -168,36 +168,33 @@ export class ConsultaFestas implements OnInit {
   }
 
   alternarDetalhes(id: number) {
-    if (this.relatorioExpandido() === id) {
-      this.relatorioExpandido.set(null);
+    if (this.reservaExpandida() === id) {
+      this.reservaExpandida.set(null);
     } else {
-      this.relatorioExpandido.set(id);
+      this.reservaExpandida.set(id);
     }
   }
 
-  getStatusPagamento(relatorio: Relatorio): string {
-    return relatorio.valorIntegral ? 'Integral' : 'Parcial';
+  getStatusPagamento(reserva: Reserva): string {
+    return reserva.valorIntegral ? 'Integral' : 'Parcial';
   }
 
-  getStatusPagamentoClass(relatorio: Relatorio): string {
-    return relatorio.valorIntegral ? 'integral' : 'parcial';
+  getStatusPagamentoClass(reserva: Reserva): string {
+    return reserva.valorIntegral ? 'integral' : 'parcial';
   }
 
   // Métodos para caixas de texto das festas da semana
-  getFestasPorEspaco(): { espaco: Espaco, festas: Relatorio[] }[] {
-    const festasDaSemana = this.filtrarFestasDaSemana(this.relatorios());
-    const festasPorEspaco: { [key: number]: Relatorio[] } = {};
+  getFestasPorEspaco(): { espaco: Espaco, festas: Reserva[] }[] {
+    const festasDaSemana = this.filtrarFestasDaSemana(this.reservas());
+    const festasPorEspaco: { [key: number]: Reserva[] } = {};
 
     // Agrupar festas por espaço
-    festasDaSemana.forEach(relatorio => {
-      const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
-      if (tipoContrato) {
-        const espacoId = tipoContrato.espacoId;
-        if (!festasPorEspaco[espacoId]) {
-          festasPorEspaco[espacoId] = [];
-        }
-        festasPorEspaco[espacoId].push(relatorio);
+    festasDaSemana.forEach(reserva => {
+      const espacoId = reserva.espacoId;
+      if (!festasPorEspaco[espacoId]) {
+        festasPorEspaco[espacoId] = [];
       }
+      festasPorEspaco[espacoId].push(reserva);
     });
 
     // Converter para array e ordenar por data
@@ -210,20 +207,21 @@ export class ConsultaFestas implements OnInit {
     }).filter(item => item.espaco); // Filtrar espaços não encontrados
   }
 
-  gerarTextoFestas(espaco: Espaco, festas: Relatorio[]): string {
+  gerarTextoFestas(espaco: Espaco, festas: Reserva[]): string {
     let texto = `FESTAS DA SEMANA - ${espaco.nome.toUpperCase()}\n`;
     texto += `${'='.repeat(50)}\n\n`;
 
-    festas.forEach((relatorio, index) => {
-      const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
-      const statusPagamento = relatorio.valorIntegral ? 'INTEGRAL' : 'PARCIAL';
+    festas.forEach((reserva, index) => {
+      const statusPagamento = reserva.valorIntegral ? 'INTEGRAL' : 'PARCIAL';
 
-      texto += `${index + 1}. ${relatorio.nomeCliente}\n`;
-      texto += `   Data: ${this.formatarDataComDiaSemana(relatorio.dataFesta)}\n`;
-      texto += `   Horário: ${relatorio.horaInicio} às ${relatorio.horaFim}\n`;
+      texto += `${index + 1}. ${reserva.nomeCliente}\n`;
+      texto += `   Data: ${this.formatarDataComDiaSemana(reserva.dataFesta)}\n`;
+      texto += `   Horário: ${reserva.horaInicio} às ${reserva.horaFim}\n`;
+      texto += `   Telefone: ${reserva.telefoneCliente}\n`;
+      texto += `   Valor: R$ ${reserva.valorPagamento.toFixed(2)}\n`;
       texto += `   Pagamento: ${statusPagamento}\n`;
-      if (tipoContrato) {
-        texto += `   Tipo: ${tipoContrato.tipo}${tipoContrato.descricao ? ` (${tipoContrato.descricao})` : ''}\n`;
+      if (reserva.valorRestante && reserva.valorRestante > 0) {
+        texto += `   Restante: R$ ${reserva.valorRestante.toFixed(2)}\n`;
       }
       texto += `\n`;
     });
@@ -231,7 +229,7 @@ export class ConsultaFestas implements OnInit {
     return texto;
   }
 
-  async copiarTexto(espaco: Espaco, festas: Relatorio[]) {
+  async copiarTexto(espaco: Espaco, festas: Reserva[]) {
     const texto = this.gerarTextoFestas(espaco, festas);
 
     try {
@@ -281,20 +279,6 @@ export class ConsultaFestas implements OnInit {
     this.mostrarModalDatas.set(false);
   }
 
-  gerarRelatorioDatasDisponiveis() {
-    if (!this.dataInicio() || !this.dataFim()) {
-      console.warn('Selecione as datas de início e fim');
-      return;
-    }
-
-    if (new Date(this.dataInicio()) > new Date(this.dataFim())) {
-      console.warn('Data de início deve ser anterior à data de fim');
-      return;
-    }
-
-    this.mostrarDatasDisponiveis.set(true);
-    this.mostrarModalDatas.set(false);
-  }
 
   getDatasDisponiveisPorEspaco(): { espaco: Espaco, datas: string[] }[] {
     const datasDisponiveis: { [key: number]: string[] } = {};
@@ -324,8 +308,8 @@ export class ConsultaFestas implements OnInit {
       const idsTiposContrato = tiposContratoEspaco.map(tc => tc.id!);
 
       datasFiltradas.forEach(data => {
-        const temFesta = this.relatorios().some(relatorio =>
-          relatorio.dataFesta === data && idsTiposContrato.includes(relatorio.tipoContratoId)
+        const temFesta = this.reservas().some(reserva =>
+          reserva.dataFesta === data && idsTiposContrato.includes(reserva.espacoId)
         );
 
         if (!temFesta) {
@@ -419,42 +403,41 @@ export class ConsultaFestas implements OnInit {
   }
 
   // Métodos de filtro
-  filtrarPorEspaco(relatorios: Relatorio[], espacoId: number): Relatorio[] {
-    return relatorios.filter(relatorio => {
-      const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
-      return tipoContrato && tipoContrato.espacoId === espacoId;
+  filtrarPorEspaco(reservas: Reserva[], espacoId: number): Reserva[] {
+    return reservas.filter(reserva => {
+      return reserva.espacoId === espacoId;
     });
   }
 
-  filtrarPorMes(relatorios: Relatorio[], mesAno: string): Relatorio[] {
+  filtrarPorMes(reservas: Reserva[], mesAno: string): Reserva[] {
     const [mes, ano] = mesAno.split('/').map(Number);
-    return relatorios.filter(relatorio => {
-      const dataFesta = new Date(relatorio.dataFesta);
+    return reservas.filter(reserva => {
+      const dataFesta = new Date(reserva.dataFesta);
       return dataFesta.getMonth() + 1 === mes && dataFesta.getFullYear() === ano;
     });
   }
 
-  filtrarPorPagamento(relatorios: Relatorio[], tipoPagamento: string): Relatorio[] {
-    return relatorios.filter(relatorio => {
+  filtrarPorPagamento(reservas: Reserva[], tipoPagamento: string): Reserva[] {
+    return reservas.filter(reserva => {
       if (tipoPagamento === 'integral') {
-        return relatorio.valorIntegral;
+        return reserva.valorIntegral;
       } else if (tipoPagamento === 'parcial') {
-        return !relatorio.valorIntegral;
+        return !reserva.valorIntegral;
       }
       return true;
     });
   }
 
   // Métodos de paginação
-  getRelatoriosPaginados(): Relatorio[] {
-    const relatoriosFiltrados = this.getRelatoriosFiltrados();
+  getReservasPaginadas(): Reserva[] {
+    const reservasFiltradas = this.getReservasFiltradas();
     const inicio = (this.paginaAtual() - 1) * this.itensPorPagina();
     const fim = inicio + this.itensPorPagina();
-    return relatoriosFiltrados.slice(inicio, fim);
+    return reservasFiltradas.slice(inicio, fim);
   }
 
   getTotalPaginas(): number {
-    const totalItens = this.getRelatoriosFiltrados().length;
+    const totalItens = this.getReservasFiltradas().length;
     return Math.ceil(totalItens / this.itensPorPagina());
   }
 
@@ -491,27 +474,23 @@ export class ConsultaFestas implements OnInit {
   limparFiltros() {
     this.filtroEspaco.set(null);
     this.filtroMes.set('');
-    this.filtroPagamento.set('');
+    this.filtroPagamento.set('todos');
     this.paginaAtual.set(1);
   }
 
   // Método para obter nome do espaço
-  getNomeEspaco(relatorio: Relatorio): string {
-    const tipoContrato = this.tiposContrato().find(tc => tc.id === relatorio.tipoContratoId);
-    if (tipoContrato) {
-      const espaco = this.espacos().find(e => e.id === tipoContrato.espacoId);
-      return espaco ? espaco.nome : 'Espaço não encontrado';
-    }
-    return 'Espaço não encontrado';
+  getNomeEspaco(reserva: Reserva): string {
+    const espaco = this.espacos().find(e => e.id === reserva.espacoId);
+    return espaco ? espaco.nome : 'Espaço não encontrado';
   }
 
   // Método para obter opções de mês
   getOpcoesMes(): string[] {
     const meses: string[] = [];
-    const relatorios = this.relatorios();
+    const reservas = this.reservas();
 
-    relatorios.forEach(relatorio => {
-      const dataFesta = new Date(relatorio.dataFesta);
+    reservas.forEach(reserva => {
+      const dataFesta = new Date(reserva.dataFesta);
       const mesAno = `${dataFesta.getMonth() + 1}/${dataFesta.getFullYear()}`;
       if (!meses.includes(mesAno)) {
         meses.push(mesAno);

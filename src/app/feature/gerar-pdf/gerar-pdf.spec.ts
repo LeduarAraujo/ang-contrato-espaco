@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GerarRelatorio } from './gerar-relatorio';
+import { GerarPdf } from './gerar-pdf';
 
-describe('GerarRelatorio', () => {
-  let component: GerarRelatorio;
-  let fixture: ComponentFixture<GerarRelatorio>;
+describe('GerarPdf', () => {
+  let component: GerarPdf;
+  let fixture: ComponentFixture<GerarPdf>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GerarRelatorio]
+      imports: [GerarPdf]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GerarRelatorio);
+    fixture = TestBed.createComponent(GerarPdf);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -21,3 +21,4 @@ describe('GerarRelatorio', () => {
     expect(component).toBeTruthy();
   });
 });
+

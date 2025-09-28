@@ -4,7 +4,7 @@
  */
 export const API_CONFIG = {
   // Base URL da API
-  BASE_URL: 'https://c794ba48-ce78-46a7-8d5c-ed5e1d125727-00-1d73oozkigvdf.janeway.replit.dev/api',
+  BASE_URL: 'https://9c7598e0-a0c4-438a-af7a-a8e11ce6fe2b-00-2t3hui5e96o.picard.replit.dev/api',
 
   // Endpoints para Espaços
   ESPACOS: {
@@ -27,17 +27,17 @@ export const API_CONFIG = {
     BUSCAR_POR_TIPO: '/tipos-contrato/tipo/:tipo'
   },
 
-  // Endpoints para Relatórios
-  RELATORIOS: {
-    LISTAR: '/relatorios',
-    BUSCAR: '/relatorios/:id',
-    CRIAR: '/relatorios',
-    ATUALIZAR: '/relatorios/:id',
-    EXCLUIR: '/relatorios/:id',
-    BUSCAR_POR_TIPO_CONTRATO: '/relatorios/tipo-contrato/:tipoContratoId',
-    BUSCAR_POR_PERIODO: '/relatorios/periodo',
-    BUSCAR_POR_CLIENTE: '/relatorios/cliente',
-    BUSCAR_POR_CPF: '/relatorios/cpf'
+  // Endpoints para Reservas
+  RESERVAS: {
+    LISTAR: '/reservas',
+    BUSCAR: '/reservas/:id',
+    CRIAR: '/reservas',
+    ATUALIZAR: '/reservas/:id',
+    EXCLUIR: '/reservas/:id',
+    BUSCAR_POR_ESPACO: '/reservas/espaco/:espacoId',
+    BUSCAR_POR_PERIODO: '/reservas/periodo',
+    BUSCAR_POR_CLIENTE: '/reservas/cliente',
+    BUSCAR_POR_CPF: '/reservas/cpf'
   }
 } as const;
 

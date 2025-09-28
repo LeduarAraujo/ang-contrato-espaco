@@ -38,8 +38,8 @@ describe('Home', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/cadastro-tipo-contrato']);
   });
 
-  it('should navigate to gerar-relatorio', () => {
-    component.navegarParaRelatorios();
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/gerar-relatorio']);
+  it('should navigate to lista-reservas', () => {
+    component.navegarParaReservas();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/lista-reservas']);
   });
 });
