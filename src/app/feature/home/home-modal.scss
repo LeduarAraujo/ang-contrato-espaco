@@ -1,0 +1,329 @@
+/* Modal de Detalhes da Festa */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e2e8f0;
+
+  h3 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #64748b;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #1a202c;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.modal-body {
+  padding: 20px 24px 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+
+  .no-reservas {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 20px;
+  }
+
+  .reserva-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: #f8fafc;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .reserva-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      h4 {
+        margin: 0;
+        color: #1a202c;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .status-pagamento {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+
+        &.integral {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        &.parcial {
+          background: #fef3c7;
+          color: #92400e;
+        }
+      }
+    }
+
+    .reserva-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+
+      .detail-row {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 12px;
+          color: #64748b;
+          font-weight: 500;
+          margin-bottom: 2px;
+        }
+
+        .value {
+          font-size: 14px;
+          color: #1a202c;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-content {
+    gap: 60px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-text {
+    max-width: 100%;
+  }
+
+  .hero-visual {
+    max-width: 350px;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .section-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 20px;
+  }
+
+  .hero-content {
+    gap: 40px;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .hero-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .features {
+    padding: 80px 20px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .placeholders {
+    padding: 80px 20px;
+  }
+
+  .placeholders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .dashboard-preview {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .dashboard-content {
+    gap: 12px;
+  }
+
+  .dashboard-card {
+    padding: 12px;
+  }
+
+  .festas-list {
+    .festa-item {
+      padding: 12px;
+
+      .festa-info {
+        .espaco-nome {
+          font-size: 0.875rem;
+        }
+
+        .festa-count {
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+    .no-festas {
+      font-size: 0.875rem;
+      padding: 16px;
+    }
+  }
+
+  .modal-content {
+    margin: 10px;
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    padding: 16px 20px 12px;
+
+    h3 {
+      font-size: 16px;
+    }
+  }
+
+  .modal-body {
+    padding: 16px 20px 20px;
+
+    .reserva-item {
+      padding: 12px;
+
+      .reserva-details {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 60px 16px;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-badge {
+    font-size: 0.875rem;
+    padding: 8px 16px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .feature-card {
+    padding: 24px;
+  }
+
+  .placeholder-category {
+    padding: 24px;
+  }
+
+  .dashboard-preview {
+    padding: 16px;
+  }
+
+  .modal-content {
+    margin: 5px;
+  }
+}

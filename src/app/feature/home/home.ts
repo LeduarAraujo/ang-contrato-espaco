@@ -11,7 +11,7 @@ import { Reserva } from '../../models/reserva.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './home.html',
-  styleUrl: './home.scss'
+  styleUrls: ['./home.scss', './home-modal.scss']
 })
 export class Home implements OnInit {
   // Signals para os dados reais
