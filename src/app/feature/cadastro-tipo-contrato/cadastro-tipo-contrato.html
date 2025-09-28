@@ -1,0 +1,130 @@
+<div class="container">
+  <div class="header">
+    <h1>Cadastro de Tipos de Contrato</h1>
+    <p>Configure os templates de texto para contratos e recibos</p>
+  </div>
+
+  <!-- Formulário de Cadastro -->
+  <div class="form-section">
+    <h2>Novo Tipo de Contrato</h2>
+    <form (ngSubmit)="salvarTipoContrato()" #tipoContratoForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="espacoId">Espaço *</label>
+          <select
+            id="espacoId"
+            name="espacoId"
+            [(ngModel)]="novoTipoContrato.espacoId"
+            required
+            class="form-control"
+          >
+            <option value="0">Selecione um espaço</option>
+            <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+              {{ espaco.nome }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo *</label>
+          <select
+            id="tipo"
+            name="tipo"
+            [(ngModel)]="novoTipoContrato.tipo"
+            required
+            class="form-control"
+          >
+            <option value="CONTRATO">Contrato</option>
+            <option value="RECIBO">Recibo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="textoTemplate">Texto do Template *</label>
+
+        <!-- Legenda dos Placeholders -->
+        <div class="placeholders-legend">
+          <h4>Placeholders disponíveis:</h4>
+          <div class="placeholders-grid">
+            <button
+              type="button"
+              *ngFor="let placeholder of placeholders"
+              class="placeholder-btn"
+              (click)="inserirPlaceholder(placeholder)"
+              [title]="'Inserir ' + placeholder"
+            >
+              {{ placeholder }}
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          id="textoTemplate"
+          name="textoTemplate"
+          [(ngModel)]="novoTipoContrato.textoTemplate"
+          required
+          placeholder="Digite aqui o texto do template. Use os placeholders acima para substituir informações dinâmicas."
+          class="form-control textarea-large"
+          rows="10"
+        ></textarea>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="salvando() || !tipoContratoForm.form.valid"
+      >
+        <span *ngIf="salvando()">Salvando...</span>
+        <span *ngIf="!salvando()">Salvar Tipo de Contrato</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de Tipos de Contrato -->
+  <div class="list-section">
+    <h2>Tipos de Contrato Cadastrados</h2>
+
+    <div *ngIf="loading()" class="loading">
+      <p>Carregando tipos de contrato...</p>
+    </div>
+
+    <div *ngIf="!loading() && tiposContrato().length === 0" class="empty-state">
+      <p>Nenhum tipo de contrato cadastrado ainda.</p>
+    </div>
+
+    <div *ngIf="!loading() && tiposContrato().length > 0" class="tipos-contrato-grid">
+      <div *ngFor="let tipoContrato of tiposContrato()" class="tipo-contrato-card">
+        <div class="tipo-contrato-header">
+          <div class="tipo-contrato-info">
+            <h3>{{ getEspacoNome(tipoContrato.espacoId) }}</h3>
+            <span class="tipo-badge" [class.contrato]="tipoContrato.tipo === 'CONTRATO'" [class.recibo]="tipoContrato.tipo === 'RECIBO'">
+              {{ tipoContrato.tipo }}
+            </span>
+          </div>
+          <button
+            class="btn btn-danger btn-sm"
+            (click)="excluirTipoContrato(tipoContrato.id!)"
+            title="Excluir tipo de contrato"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="tipo-contrato-content">
+          <div class="template-preview">
+            <h4>Preview do Template:</h4>
+            <div class="template-text">
+              {{ tipoContrato.textoTemplate | slice:0:200 }}{{ tipoContrato.textoTemplate.length > 200 ? '...' : '' }}
+            </div>
+          </div>
+
+          <div class="tipo-contrato-meta">
+            <p><strong>ID:</strong> {{ tipoContrato.id }}</p>
+            <p *ngIf="tipoContrato.createdAt"><strong>Criado em:</strong> {{ tipoContrato.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

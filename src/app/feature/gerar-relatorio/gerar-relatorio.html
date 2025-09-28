@@ -1,0 +1,251 @@
+<div class="container">
+  <div class="header">
+    <h1>Geração de Relatórios</h1>
+    <p>Gere contratos e recibos personalizados para seus clientes</p>
+  </div>
+
+  <!-- Formulário de Geração -->
+  <div class="form-section">
+    <h2>Novo Relatório</h2>
+    <form (ngSubmit)="salvarRelatorio()" #relatorioForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tipoContratoId">Tipo de Contrato *</label>
+          <select
+            id="tipoContratoId"
+            name="tipoContratoId"
+            [(ngModel)]="novoRelatorio.tipoContratoId"
+            required
+            class="form-control"
+          >
+            <option value="0">Selecione um tipo de contrato</option>
+            <option *ngFor="let tipoContrato of tiposContrato()" [value]="tipoContrato.id">
+              {{ getTipoContratoInfo(tipoContrato.id!).espaco }} - {{ tipoContrato.tipo }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nomeCliente">Nome do Cliente *</label>
+          <input
+            type="text"
+            id="nomeCliente"
+            name="nomeCliente"
+            [(ngModel)]="novoRelatorio.nomeCliente"
+            required
+            placeholder="Nome completo do cliente"
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="cpfCliente">CPF do Cliente *</label>
+          <input
+            type="text"
+            id="cpfCliente"
+            name="cpfCliente"
+            [(ngModel)]="novoRelatorio.cpfCliente"
+            required
+            placeholder="000.000.000-00"
+            maxlength="14"
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dataFesta">Data da Festa *</label>
+          <input
+            type="date"
+            id="dataFesta"
+            name="dataFesta"
+            [(ngModel)]="novoRelatorio.dataFesta"
+            required
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="valorPago">Valor Pago *</label>
+          <input
+            type="number"
+            id="valorPago"
+            name="valorPago"
+            [(ngModel)]="novoRelatorio.valorPago"
+            required
+            min="0.01"
+            step="0.01"
+            placeholder="0,00"
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="horaInicio">Hora de Início *</label>
+          <input
+            type="time"
+            id="horaInicio"
+            name="horaInicio"
+            [(ngModel)]="novoRelatorio.horaInicio"
+            required
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="horaFim">Hora de Fim *</label>
+          <input
+            type="time"
+            id="horaFim"
+            name="horaFim"
+            [(ngModel)]="novoRelatorio.horaFim"
+            required
+            class="form-control"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="novoRelatorio.valorIntegral"
+            name="valorIntegral"
+          >
+          Valor Integral (pagamento completo)
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="salvando() || !relatorioForm.form.valid"
+      >
+        <span *ngIf="salvando()">Gerando...</span>
+        <span *ngIf="!salvando()">Gerar Relatório</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <h2>Filtros</h2>
+    <div class="filters-row">
+      <div class="form-group">
+        <label for="espacoFiltro">Espaço</label>
+        <select
+          id="espacoFiltro"
+          [(ngModel)]="espacoFiltro"
+          class="form-control"
+        >
+          <option value="0">Todos os espaços</option>
+          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+            {{ espaco.nome }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="tipoFiltro">Tipo</label>
+        <select
+          id="tipoFiltro"
+          [(ngModel)]="tipoFiltro"
+          class="form-control"
+        >
+          <option value="">Todos os tipos</option>
+          <option value="CONTRATO">Contrato</option>
+          <option value="RECIBO">Recibo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Relatórios -->
+  <div class="list-section">
+    <h2>Relatórios Gerados</h2>
+
+    <div *ngIf="loading()" class="loading">
+      <p>Carregando relatórios...</p>
+    </div>
+
+    <div *ngIf="!loading() && getRelatoriosFiltrados().length === 0" class="empty-state">
+      <p>Nenhum relatório gerado ainda.</p>
+    </div>
+
+    <div *ngIf="!loading() && getRelatoriosFiltrados().length > 0" class="relatorios-grid">
+      <div *ngFor="let relatorio of getRelatoriosFiltrados()" class="relatorio-card">
+        <div class="relatorio-header">
+          <div class="relatorio-info">
+            <h3>{{ relatorio.nomeCliente }}</h3>
+            <span class="tipo-badge" [class.contrato]="getTipoContratoInfo(relatorio.tipoContratoId).tipo === 'CONTRATO'" [class.recibo]="getTipoContratoInfo(relatorio.tipoContratoId).tipo === 'RECIBO'">
+              {{ getTipoContratoInfo(relatorio.tipoContratoId).tipo }}
+            </span>
+          </div>
+          <button
+            class="btn btn-danger btn-sm"
+            (click)="excluirRelatorio(relatorio.id!)"
+            title="Excluir relatório"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="relatorio-content">
+          <div class="relatorio-details">
+            <div class="detail-row">
+              <span class="label">Espaço:</span>
+              <span class="value">{{ getTipoContratoInfo(relatorio.tipoContratoId).espaco }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">CPF:</span>
+              <span class="value">{{ formatarCPF(relatorio.cpfCliente) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Data da Festa:</span>
+              <span class="value">{{ relatorio.dataFesta | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Horário:</span>
+              <span class="value">{{ relatorio.horaInicio }} - {{ relatorio.horaFim }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Valor:</span>
+              <span class="value valor">{{ formatarValor(relatorio.valorPago) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Pagamento:</span>
+              <span class="value" [class.integral]="relatorio.valorIntegral">
+                {{ relatorio.valorIntegral ? 'Integral' : 'Parcial' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="relatorio-meta">
+            <p><strong>ID:</strong> {{ relatorio.id }}</p>
+            <p *ngIf="relatorio.createdAt"><strong>Gerado em:</strong> {{ relatorio.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+
+          <div class="relatorio-actions">
+            <button
+              class="btn btn-success btn-sm"
+              (click)="baixarPdf(relatorio.id!)"
+              title="Baixar PDF"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Baixar PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
