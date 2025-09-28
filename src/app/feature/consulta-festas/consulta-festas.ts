@@ -22,25 +22,28 @@ export class ConsultaFestas implements OnInit {
   loading = signal<boolean>(false);
   reservaExpandida = signal<number | null>(null);
 
-  // Filtros
-  filtroSemana = signal<boolean>(false);
-  mostrarCaixasTexto = signal<boolean>(false);
+  // Estados das seções
+  mostrarFestasSemana = signal<boolean>(false);
   mostrarDatasDisponiveis = signal<boolean>(false);
-  mostrarModalDatas = signal<boolean>(false);
+  mostrarConsultaData = signal<boolean>(false);
 
-  // Novos filtros
-  filtroEspaco = signal<number | null>(null);
-  filtroMes = signal<string>('');
-  filtroPagamento = signal<string>('todos'); // 'todos', 'integral', 'parcial'
+  // Filtros para festas da semana
+  espacoSelecionadoSemana = signal<number | null>(null);
 
-  // Paginação
-  paginaAtual = signal<number>(1);
-  itensPorPagina = signal<number>(5);
-
-  // Configurações do modal de datas
+  // Filtros para datas disponíveis
+  espacoSelecionadoDatas = signal<number | null>(null);
   dataInicio = signal<string>('');
   dataFim = signal<string>('');
   tipoDias = signal<'todos' | 'finais' | 'dias-semana'>('todos');
+
+  // Consulta de data específica
+  dataConsulta = signal<string>('');
+  espacoConsulta = signal<number | null>(null);
+  reservaEncontrada = signal<Reserva | null>(null);
+  loadingConsulta = signal<boolean>(false);
+
+  // Modal de datas
+  mostrarModalDatas = signal<boolean>(false);
 
   constructor(
     private reservaService: ReservaService,
@@ -85,50 +88,36 @@ export class ConsultaFestas implements OnInit {
     }
   }
 
-  getReservasFiltradas(): Reserva[] {
-    let reservas = this.reservas();
-
-    // Filtro por semana
-    if (this.filtroSemana()) {
-      reservas = this.filtrarFestasDaSemana(reservas);
-    }
-
-    // Filtro por espaço
-    if (this.filtroEspaco()) {
-      reservas = this.filtrarPorEspaco(reservas, this.filtroEspaco()!);
-    }
-
-    // Filtro por mês
-    if (this.filtroMes()) {
-      reservas = this.filtrarPorMes(reservas, this.filtroMes()!);
-    }
-
-    // Filtro por pagamento
-    if (this.filtroPagamento() && this.filtroPagamento() !== 'todos') {
-      reservas = this.filtrarPorPagamento(reservas, this.filtroPagamento()!);
-    }
-
-    // Ordenar por data da festa
-    return reservas.sort((a, b) => new Date(a.dataFesta).getTime() - new Date(b.dataFesta).getTime());
-  }
+  // Método removido - não mais necessário na nova estrutura
 
   filtrarFestasDaSemana(reservas: Reserva[]): Reserva[] {
     const hoje = new Date();
-    const inicioSemana = new Date(hoje);
+    const diaDaSemana = hoje.getDay(); // 0=domingo, 1=segunda, ..., 6=sábado
 
-    // Calcular o início da semana (segunda-feira)
-    // getDay() retorna: 0=domingo, 1=segunda, 2=terça, ..., 6=sábado
-    const diaDaSemana = hoje.getDay();
-    const diasParaSegunda = diaDaSemana === 0 ? -6 : 1 - diaDaSemana; // Se domingo, volta 6 dias; senão, calcula dias para segunda
+    // Lógica específica:
+    // - Se hoje é domingo (0): mostra PRÓXIMA semana (segunda até domingo)
+    // - Se hoje é sexta (5) ou sábado (6): mostra PRÓXIMA semana
+    // - Se hoje é segunda (1) a quinta (4): mostra semana ATUAL
+    const mostrarProximaSemana = diaDaSemana === 0 || diaDaSemana >= 5;
+
+    // Calcular início da semana atual (segunda-feira)
+    const diasParaSegunda = diaDaSemana === 0 ? -6 : 1 - diaDaSemana;
+    let inicioSemana = new Date(hoje);
     inicioSemana.setDate(hoje.getDate() + diasParaSegunda);
     inicioSemana.setHours(0, 0, 0, 0);
 
+    // Se deve mostrar próxima semana, adicionar 7 dias
+    if (mostrarProximaSemana) {
+      inicioSemana.setDate(inicioSemana.getDate() + 7);
+    }
+
+    // Calcular fim da semana (domingo)
     const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(inicioSemana.getDate() + 6); // Domingo (6 dias após segunda)
+    fimSemana.setDate(inicioSemana.getDate() + 6); // Domingo
     fimSemana.setHours(23, 59, 59, 999);
 
     return reservas.filter(reserva => {
-      const dataFesta = new Date(reserva.dataFesta);
+      const dataFesta = new Date(reserva.dataFesta + 'T00:00:00'); // Forçar timezone local
       return dataFesta >= inicioSemana && dataFesta <= fimSemana;
     });
   }
@@ -257,10 +246,7 @@ export class ConsultaFestas implements OnInit {
     document.body.removeChild(textArea);
   }
 
-  ativarFiltroSemana() {
-    this.filtroSemana.set(!this.filtroSemana());
-    this.mostrarCaixasTexto.set(this.filtroSemana());
-  }
+  // Método removido - não mais necessário na nova estrutura
 
   // Métodos para datas disponíveis
   abrirModalDatas() {
@@ -281,6 +267,10 @@ export class ConsultaFestas implements OnInit {
 
 
   getDatasDisponiveisPorEspaco(): { espaco: Espaco, datas: string[] }[] {
+    if (!this.dataInicio() || !this.dataFim()) {
+      return [];
+    }
+
     const datasDisponiveis: { [key: number]: string[] } = {};
     const espacos = this.espacos();
 
@@ -304,12 +294,9 @@ export class ConsultaFestas implements OnInit {
 
     // Para cada espaço, verificar quais datas não têm festas
     espacos.forEach(espaco => {
-      const tiposContratoEspaco = this.tiposContrato().filter(tc => tc.espacoId === espaco.id);
-      const idsTiposContrato = tiposContratoEspaco.map(tc => tc.id!);
-
       datasFiltradas.forEach(data => {
         const temFesta = this.reservas().some(reserva =>
-          reserva.dataFesta === data && idsTiposContrato.includes(reserva.espacoId)
+          reserva.dataFesta === data && reserva.espacoId === espaco.id
         );
 
         if (!temFesta) {
@@ -395,10 +382,12 @@ export class ConsultaFestas implements OnInit {
 
     try {
       await navigator.clipboard.writeText(texto);
-      console.log('Texto copiado para a área de transferência!');
+      console.log('Datas copiadas para a área de transferência!');
+      alert('Datas copiadas para a área de transferência!');
     } catch (error) {
       console.error('Erro ao copiar texto:', error);
       this.copiarTextoFallback(texto);
+      alert('Datas copiadas para a área de transferência!');
     }
   }
 
@@ -428,55 +417,7 @@ export class ConsultaFestas implements OnInit {
     });
   }
 
-  // Métodos de paginação
-  getReservasPaginadas(): Reserva[] {
-    const reservasFiltradas = this.getReservasFiltradas();
-    const inicio = (this.paginaAtual() - 1) * this.itensPorPagina();
-    const fim = inicio + this.itensPorPagina();
-    return reservasFiltradas.slice(inicio, fim);
-  }
-
-  getTotalPaginas(): number {
-    const totalItens = this.getReservasFiltradas().length;
-    return Math.ceil(totalItens / this.itensPorPagina());
-  }
-
-  getPaginas(): number[] {
-    const totalPaginas = this.getTotalPaginas();
-    const paginas: number[] = [];
-    for (let i = 1; i <= totalPaginas; i++) {
-      paginas.push(i);
-    }
-    return paginas;
-  }
-
-  irParaPagina(pagina: number) {
-    const totalPaginas = this.getTotalPaginas();
-    if (pagina >= 1 && pagina <= totalPaginas) {
-      this.paginaAtual.set(pagina);
-    }
-  }
-
-  paginaAnterior() {
-    if (this.paginaAtual() > 1) {
-      this.paginaAtual.set(this.paginaAtual() - 1);
-    }
-  }
-
-  proximaPagina() {
-    const totalPaginas = this.getTotalPaginas();
-    if (this.paginaAtual() < totalPaginas) {
-      this.paginaAtual.set(this.paginaAtual() + 1);
-    }
-  }
-
-  // Métodos para resetar filtros
-  limparFiltros() {
-    this.filtroEspaco.set(null);
-    this.filtroMes.set('');
-    this.filtroPagamento.set('todos');
-    this.paginaAtual.set(1);
-  }
+  // Métodos removidos - não mais necessários na nova estrutura
 
   // Método para obter nome do espaço
   getNomeEspaco(reserva: Reserva): string {
@@ -512,5 +453,163 @@ export class ConsultaFestas implements OnInit {
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
     return `${nomesMeses[mes - 1]} ${ano}`;
+  }
+
+  // Métodos para controle das seções
+  alternarFestasSemana() {
+    this.mostrarFestasSemana.set(!this.mostrarFestasSemana());
+  }
+
+  alternarDatasDisponiveis() {
+    this.mostrarDatasDisponiveis.set(!this.mostrarDatasDisponiveis());
+  }
+
+  alternarConsultaData() {
+    this.mostrarConsultaData.set(!this.mostrarConsultaData());
+  }
+
+  // Consultar data específica
+  async consultarData() {
+    if (!this.dataConsulta() || !this.espacoConsulta()) {
+      alert('Por favor, selecione uma data e um espaço.');
+      return;
+    }
+
+    this.loadingConsulta.set(true);
+    this.reservaEncontrada.set(null);
+
+    try {
+      // Buscar reservas por período (um dia)
+      const reservas = await this.reservaService.buscarReservasPorPeriodo(
+        this.dataConsulta(),
+        this.dataConsulta()
+      ).toPromise();
+
+      // Filtrar pela data e espaço específicos
+      const reserva = reservas?.find(r =>
+        r.dataFesta === this.dataConsulta() &&
+        r.espacoId === Number(this.espacoConsulta())
+      );
+
+      this.reservaEncontrada.set(reserva || null);
+
+      if (!reserva) {
+        console.log('Nenhuma reserva encontrada para a data e espaço selecionados.');
+      }
+    } catch (error) {
+      console.error('Erro ao consultar data:', error);
+      alert('Erro ao consultar a data. Tente novamente.');
+    } finally {
+      this.loadingConsulta.set(false);
+    }
+  }
+
+  // Obter festas da semana por espaço selecionado
+  getFestasSemanaPorEspaco(): Reserva[] {
+    if (!this.espacoSelecionadoSemana()) {
+      return [];
+    }
+
+    const festasDaSemana = this.filtrarFestasDaSemana(this.reservas());
+    return festasDaSemana.filter(reserva =>
+      reserva.espacoId === Number(this.espacoSelecionadoSemana())
+    );
+  }
+
+  // Obter datas disponíveis por espaço selecionado
+  getDatasDisponiveisPorEspacoSelecionado(): string[] {
+    if (!this.espacoSelecionadoDatas()) {
+      return [];
+    }
+
+    const todasAsDatasArray = this.getDatasDisponiveisPorEspaco();
+    const todasAsDatas = todasAsDatasArray
+      .find(item => item.espaco.id === Number(this.espacoSelecionadoDatas()));
+
+    return todasAsDatas?.datas || [];
+  }
+
+  // Obter nome do espaço por ID
+  getNomeEspacoPorId(espacoId: number): string {
+    const espaco = this.espacos().find(e => e.id === espacoId);
+    return espaco ? espaco.nome : 'Espaço não encontrado';
+  }
+
+  // Métodos auxiliares para o template
+  getEspacoSelecionadoSemana(): Espaco | undefined {
+    return this.espacos().find(e => e.id === this.espacoSelecionadoSemana());
+  }
+
+  getEspacoSelecionadoDatas(): Espaco | undefined {
+    return this.espacos().find(e => e.id === this.espacoSelecionadoDatas());
+  }
+
+  copiarFestasSemana() {
+    // Simplesmente copia as festas que estão sendo exibidas no grid
+    const festas = this.getFestasSemanaPorEspaco();
+
+    if (festas.length === 0) {
+      // Se não há festas, copia uma mensagem informativa
+      this.copiarTextoSimples('Nenhuma festa encontrada para esta semana.');
+      return;
+    }
+
+    // Gera texto simples com as festas
+    let texto = 'FESTAS DA SEMANA\n';
+    texto += '='.repeat(20) + '\n\n';
+
+    festas.forEach(festa => {
+      const dataFormatada = new Date(festa.dataFesta + 'T00:00:00');
+      const diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dataFormatada.getDay()];
+      texto += `${dataFormatada.toLocaleDateString('pt-BR')} (${diaSemana})\n`;
+      texto += `Cliente: ${festa.nomeCliente}\n`;
+      texto += `Horário: ${festa.horaInicio} às ${festa.horaFim}\n`;
+      texto += `Telefone: ${festa.telefoneCliente}\n`;
+      texto += `Valor: R$ ${festa.valorPagamento.toFixed(2)}\n`;
+      texto += `Pagamento: ${festa.valorIntegral ? 'Integral' : 'Parcial'}\n`;
+      texto += '-'.repeat(30) + '\n\n';
+    });
+
+    texto += `Total: ${festas.length} festa(s) agendada(s)`;
+
+    this.copiarTextoSimples(texto);
+  }
+
+  copiarDatasDisponiveis() {
+    // Simplesmente copia as datas que estão sendo exibidas no grid
+    const datas = this.getDatasDisponiveisPorEspacoSelecionado();
+
+    if (datas.length === 0) {
+      // Se não há datas, copia uma mensagem informativa
+      this.copiarTextoSimples('Nenhuma data disponível no período selecionado.');
+      return;
+    }
+
+    // Gera texto simples com as datas
+    let texto = 'DATAS DISPONÍVEIS\n';
+    texto += '='.repeat(20) + '\n\n';
+
+    datas.forEach(data => {
+      const dataFormatada = new Date(data + 'T00:00:00');
+      const diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dataFormatada.getDay()];
+      texto += `${dataFormatada.toLocaleDateString('pt-BR')} (${diaSemana})\n`;
+    });
+
+    texto += `\nTotal: ${datas.length} data(s) disponível(is)`;
+
+    this.copiarTextoSimples(texto);
+  }
+
+  // Função simples para copiar texto
+  async copiarTextoSimples(texto: string) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      console.log('Texto copiado para a área de transferência!');
+      alert('Datas copiadas para a área de transferência!');
+    } catch (error) {
+      console.error('Erro ao copiar texto:', error);
+      this.copiarTextoFallback(texto);
+      alert('Datas copiadas para a área de transferência!');
+    }
   }
 }

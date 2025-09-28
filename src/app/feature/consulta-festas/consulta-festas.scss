@@ -21,53 +21,72 @@
   }
 }
 
-.filters-section {
+// Seções principais
+.section-card {
   background: white;
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
-.filters-header {
+.section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin: 0;
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .section-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      color: white;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0;
+    }
   }
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+.section-content {
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+// Formulários
+.form-group {
+  margin-bottom: 20px;
 
   label {
-    font-size: 0.875rem;
+    display: block;
     font-weight: 600;
     color: #4a5568;
+    margin-bottom: 8px;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
   }
 
   .form-control {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 16px;
     border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 0.875rem;
+    border-radius: 12px;
+    font-size: 1rem;
     transition: all 0.3s ease;
     background: white;
 
@@ -79,197 +98,30 @@
   }
 }
 
-.filters-row {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.list-section {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-
-  .section-title {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #2d3748;
-      margin: 0;
-    }
-
-    .total-count {
-      background: #f7fafc;
-      color: #4a5568;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      align-self: flex-start;
-    }
-  }
-}
-
-.loading, .empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #718096;
-  font-size: 1.125rem;
-}
-
-.festas-grid {
+.form-row {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
-}
 
-.festa-card {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 24px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: #667eea;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
-    transform: translateY(-2px);
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
   }
 }
 
-.festa-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-}
-
-.festa-info {
-  flex: 1;
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin: 0 0 8px 0;
-  }
-
-  .festa-details {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .espaco-festa {
-      color: #667eea;
-      font-weight: 600;
-      font-size: 0.875rem;
-      background: #f0f4ff;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-
-    .data-festa {
-      color: #4a5568;
-      font-weight: 500;
-      font-size: 0.875rem;
-    }
-
-    .status-pagamento {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-
-      &.integral {
-        background: #c6f6d5;
-        color: #22543d;
-      }
-
-      &.parcial {
-        background: #fed7d7;
-        color: #742a2a;
-      }
-    }
-  }
-}
-
-.festa-details-expanded {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
-  margin-top: 16px;
-  animation: expand 0.3s ease-out;
-}
-
-@keyframes expand {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  .label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #718096;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .value {
-    font-size: 0.875rem;
-    color: #2d3748;
-    font-weight: 500;
-
-    &.valor {
-      color: #38a169;
-      font-weight: 600;
-    }
-  }
-}
-
+// Botões
 .btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
   font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 
   &:disabled {
     opacity: 0.6;
@@ -277,119 +129,171 @@
   }
 
   &.btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
   }
 
   &.btn-secondary {
-    background: #718096;
-    color: white;
+    background: #f7fafc;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
 
     &:hover:not(:disabled) {
-      background: #4a5568;
-      transform: translateY(-1px);
-    }
-
-    &.active {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      background: #edf2f7;
+      border-color: #cbd5e0;
     }
   }
 
   &.btn-sm {
     padding: 8px 16px;
-    font-size: 0.75rem;
-  }
-
-  &.btn-success {
-    background: linear-gradient(135deg, #48bb78, #38a169);
-    color: white;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(72, 187, 120, 0.3);
-    }
-  }
-
-  &.btn-info {
-    background: linear-gradient(135deg, #4299e1, #3182ce);
-    color: white;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
-    }
+    font-size: 0.8rem;
   }
 }
 
-// Estilos para caixas de texto das festas da semana
-.caixas-texto-section {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-  margin-bottom: 32px;
+// Conteúdo das festas
+.festas-content {
+  margin-top: 20px;
 }
 
-.caixas-texto-grid {
-  display: grid;
-  gap: 24px;
-}
-
-.caixa-texto-card {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 24px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: #48bb78;
-    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.1);
-    transform: translateY(-2px);
-  }
-}
-
-.caixa-texto-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
+.festas-list {
+  h4 {
     color: #2d3748;
-    margin: 0;
+    margin-bottom: 16px;
+    font-size: 1.125rem;
   }
 }
 
-.caixa-texto-content {
-  background: white;
-  border: 1px solid #e2e8f0;
+.festa-item {
+  background: #f7fafc;
   border-radius: 12px;
   padding: 16px;
-  max-height: 300px;
-  overflow-y: auto;
+  margin-bottom: 12px;
+  border-left: 4px solid #667eea;
 
-  pre {
-    margin: 0;
-    font-family: 'Courier New', monospace;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: #2d3748;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+  .festa-info {
+    h5 {
+      color: #2d3748;
+      margin: 0 0 8px 0;
+      font-size: 1.125rem;
+    }
+
+    p {
+      margin: 4px 0;
+      color: #4a5568;
+      font-size: 0.875rem;
+
+      strong {
+        color: #2d3748;
+      }
+    }
   }
 }
 
-// Estilos para o modal
+// Status de pagamento
+.integral {
+  background: #c6f6d5;
+  color: #22543d;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.parcial {
+  background: #fed7d7;
+  color: #742a2a;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// Datas disponíveis
+.datas-content {
+  margin-top: 20px;
+}
+
+.datas-list {
+  margin-top: 20px;
+
+  h4 {
+    color: #2d3748;
+    margin-bottom: 16px;
+    font-size: 1.125rem;
+  }
+}
+
+.dates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.date-item {
+  background: #e6fffa;
+  color: #234e52;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  border: 2px solid #81e6d9;
+}
+
+// Consulta de data
+.reserva-encontrada {
+  margin-top: 24px;
+
+  h4 {
+    color: #2d3748;
+    margin-bottom: 16px;
+    font-size: 1.125rem;
+  }
+}
+
+.reserva-card {
+  background: #f0fff4;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #48bb78;
+
+  .reserva-info {
+    h5 {
+      color: #2d3748;
+      margin: 0 0 12px 0;
+      font-size: 1.25rem;
+    }
+
+    p {
+      margin: 6px 0;
+      color: #4a5568;
+      font-size: 0.875rem;
+
+      strong {
+        color: #2d3748;
+      }
+    }
+  }
+}
+
+// Estados vazios
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #718096;
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+// Modal
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -406,24 +310,12 @@
 
 .modal-content {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
@@ -431,8 +323,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 24px;
 
   h3 {
     font-size: 1.25rem;
@@ -440,58 +330,25 @@
     color: #2d3748;
     margin: 0;
   }
-}
 
-.modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  color: #718096;
-  transition: all 0.2s ease;
+  .btn-close {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 
-  &:hover {
-    background: #f7fafc;
-    color: #2d3748;
-  }
-
-  svg {
-    width: 20px;
-    height: 20px;
+    &:hover {
+      background: #f7fafc;
+      color: #4a5568;
+    }
   }
 }
 
 .modal-body {
-  padding: 0 24px 24px 24px;
-
-  .form-group {
-    margin-bottom: 20px;
-
-    label {
-      display: block;
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 8px;
-      font-size: 0.875rem;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background: white;
-
-      &:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-    }
-  }
+  padding: 24px;
 }
 
 .modal-footer {
@@ -499,148 +356,41 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 0 24px 24px 24px;
-  border-top: 1px solid #e2e8f0;
-  margin-top: 24px;
-  padding-top: 24px;
 }
 
+// Responsividade
 @media (max-width: 768px) {
   .container {
     padding: 20px 16px;
   }
 
-  .festa-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
+  .header h1 {
+    font-size: 2rem;
   }
 
-  .festa-details {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 8px !important;
-  }
-
-  .details-grid {
-    grid-template-columns: 1fr;
+  .section-card {
+    padding: 20px;
   }
 
   .section-header {
     flex-direction: column;
     gap: 16px;
-    align-items: flex-start;
+    align-items: stretch;
 
     .section-title {
-      width: 100%;
-    }
-  }
-
-  .caixa-texto-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: stretch;
-  }
-
-  .caixa-texto-content {
-    max-height: 200px;
-  }
-
-  .modal-content {
-    margin: 10px;
-    max-width: calc(100% - 20px);
-  }
-
-  .modal-header {
-    padding: 16px 16px 0 16px;
-  }
-
-  .modal-body {
-    padding: 0 16px 16px 16px;
-  }
-
-  .modal-footer {
-    padding: 0 16px 16px 16px;
-    flex-direction: column;
-    gap: 8px;
-
-    .btn {
-      width: 100%;
-    }
-  }
-}
-
-// Estilos para paginação
-.pagination-section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.pagination-info {
-  text-align: center;
-  margin-bottom: 16px;
-
-  span {
-    color: #718096;
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-}
-
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.pagination-numbers {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.pagination-numbers .btn {
-  min-width: 40px;
-  height: 40px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-}
-
-// Responsividade para paginação
-@media (max-width: 768px) {
-  .filters-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .filters-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-
-    .btn {
-      width: 100%;
       justify-content: center;
     }
   }
 
-  .pagination-controls {
-    flex-direction: column;
-    gap: 16px;
+  .form-row {
+    grid-template-columns: 1fr;
   }
 
-  .pagination-numbers {
-    order: -1;
-    justify-content: center;
+  .dates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
 
-  .festa-details {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 8px !important;
+  .modal-content {
+    margin: 20px;
   }
 }

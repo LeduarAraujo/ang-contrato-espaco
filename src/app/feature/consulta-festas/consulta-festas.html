@@ -1,190 +1,268 @@
 <div class="container">
   <div class="header">
     <h1>Consulta de Festas</h1>
-    <p>Visualize todas as festas agendadas e seus detalhes</p>
+    <p>Visualize festas agendadas, datas disponíveis e consulte reservas específicas</p>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-section">
-    <div class="filters-header">
-      <h3>Filtros</h3>
-      <button class="btn btn-secondary btn-sm" (click)="limparFiltros()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M8 6V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M19 6V20C19 20.5523 18.5523 21 18 21H6C5.44772 21 5 20.5523 5 20V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Seção 1: Festas da Semana -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Festas da Semana</h2>
+      </div>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="alternarFestasSemana()"
+        [title]="mostrarFestasSemana() ? 'Ocultar detalhes' : 'Ver detalhes'"
+      >
+        <svg *ngIf="!mostrarFestasSemana()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Limpar Filtros
+        <svg *ngIf="mostrarFestasSemana()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ mostrarFestasSemana() ? 'Ocultar' : 'Detalhar' }}
       </button>
     </div>
 
-    <div class="filters-grid">
-      <!-- Filtro por Espaço -->
-      <div class="filter-group">
-        <label for="filtroEspaco">Espaço</label>
+    <div *ngIf="mostrarFestasSemana()" class="section-content">
+      <div class="form-group">
+        <label for="espacoSemana">Selecione o Espaço</label>
         <select
-          id="filtroEspaco"
-          [(ngModel)]="filtroEspaco"
+          id="espacoSemana"
+          [(ngModel)]="espacoSelecionadoSemana"
           class="form-control"
         >
-          <option [value]="null">Todos os espaços</option>
+          <option [value]="null">Selecione um espaço</option>
           <option *ngFor="let espaco of espacos()" [value]="espaco.id">
             {{ espaco.nome }}
           </option>
         </select>
       </div>
 
-      <!-- Filtro por Mês -->
-      <div class="filter-group">
-        <label for="filtroMes">Mês</label>
+      <div *ngIf="espacoSelecionadoSemana()" class="festas-content">
+        <div *ngIf="getFestasSemanaPorEspaco().length === 0" class="empty-state">
+          <p>Nenhuma festa encontrada para este espaço nesta semana.</p>
+        </div>
+
+        <div *ngIf="getFestasSemanaPorEspaco().length > 0" class="festas-list">
+          <h4>Festas de {{ getNomeEspacoPorId(espacoSelecionadoSemana()!) }} nesta semana:</h4>
+          <div class="festa-item" *ngFor="let festa of getFestasSemanaPorEspaco()">
+            <div class="festa-info">
+              <h5>{{ festa.nomeCliente }}</h5>
+              <p><strong>Data:</strong> {{ formatarDataComDiaSemana(festa.dataFesta) }}</p>
+              <p><strong>Horário:</strong> {{ festa.horaInicio }} às {{ festa.horaFim }}</p>
+              <p><strong>Telefone:</strong> {{ festa.telefoneCliente }}</p>
+              <p><strong>Valor:</strong> {{ formatarValor(festa.valorPagamento) }}</p>
+              <p><strong>Pagamento:</strong>
+                <span [class]="getStatusPagamentoClass(festa)">
+                  {{ getStatusPagamento(festa) }}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-secondary btn-sm"
+            (click)="copiarFestasSemana()"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Copiar Lista
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seção 2: Datas Disponíveis -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 16L11 18L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Datas Disponíveis</h2>
+      </div>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="alternarDatasDisponiveis()"
+        [title]="mostrarDatasDisponiveis() ? 'Ocultar detalhes' : 'Ver detalhes'"
+      >
+        <svg *ngIf="!mostrarDatasDisponiveis()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg *ngIf="mostrarDatasDisponiveis()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ mostrarDatasDisponiveis() ? 'Ocultar' : 'Detalhar' }}
+      </button>
+    </div>
+
+    <div *ngIf="mostrarDatasDisponiveis()" class="section-content">
+      <div class="form-group">
+        <label for="espacoDatas">Selecione o Espaço</label>
         <select
-          id="filtroMes"
-          [(ngModel)]="filtroMes"
+          id="espacoDatas"
+          [(ngModel)]="espacoSelecionadoDatas"
           class="form-control"
         >
-          <option value="">Todos os meses</option>
-          <option *ngFor="let mes of getOpcoesMes()" [value]="mes">
-            {{ formatarMes(mes) }}
+          <option [value]="null">Selecione um espaço</option>
+          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+            {{ espaco.nome }}
           </option>
         </select>
       </div>
 
-      <!-- Filtro por Pagamento -->
-      <div class="filter-group">
-        <label for="filtroPagamento">Pagamento</label>
-        <select
-          id="filtroPagamento"
-          [(ngModel)]="filtroPagamento"
-          class="form-control"
-        >
-          <option value="todos">Todos</option>
-          <option value="integral">Integral</option>
-          <option value="parcial">Parcial</option>
-        </select>
-      </div>
-    </div>
+      <div *ngIf="espacoSelecionadoDatas()" class="datas-content">
+        <button class="btn btn-secondary btn-sm" (click)="abrirModalDatas()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Configurar Período
+        </button>
 
-    <div class="filters-row">
-      <button
-        class="btn btn-secondary"
-        [class.active]="filtroSemana()"
-        (click)="ativarFiltroSemana()"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        {{ filtroSemana() ? 'Todas as Festas' : 'Festas da Semana' }}
-      </button>
-      <button
-        class="btn btn-info"
-        (click)="abrirModalDatas()"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Datas Disponíveis
-      </button>
-    </div>
-  </div>
+        <div *ngIf="dataInicio() && dataFim()" class="datas-list">
+          <h4>Datas disponíveis para {{ getNomeEspacoPorId(espacoSelecionadoDatas()!) }}:</h4>
+          <div *ngIf="getDatasDisponiveisPorEspacoSelecionado().length === 0" class="empty-state">
+            <p>Nenhuma data disponível no período selecionado para este espaço.</p>
+          </div>
 
-  <!-- Caixas de Texto das Festas da Semana -->
-  <div *ngIf="mostrarCaixasTexto()" class="caixas-texto-section">
-    <div class="section-header">
-      <div class="section-title">
-        <h2>Festas da Semana - Caixas de Texto</h2>
-        <span class="total-count">{{ getFestasPorEspaco().length }} espaço(s) com festas</span>
-      </div>
-      <button
-        class="btn btn-secondary btn-sm"
-        (click)="ativarFiltroSemana()"
-        title="Fechar seção de festas da semana"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Fechar
-      </button>
-    </div>
+          <div *ngIf="getDatasDisponiveisPorEspacoSelecionado().length > 0" class="dates-grid">
+            <div class="date-item" *ngFor="let data of getDatasDisponiveisPorEspacoSelecionado()">
+              {{ data | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
 
-    <div *ngIf="getFestasPorEspaco().length === 0" class="empty-state">
-      <p>Nenhuma festa encontrada para esta semana.</p>
-    </div>
-
-    <div *ngIf="getFestasPorEspaco().length > 0" class="caixas-texto-grid">
-      <div *ngFor="let item of getFestasPorEspaco()" class="caixa-texto-card">
-        <div class="caixa-texto-header">
-          <h3>{{ item.espaco.nome }}</h3>
           <button
-            class="btn btn-success btn-sm"
-            (click)="copiarTexto(item.espaco, item.festas)"
-            title="Copiar texto das festas"
+            *ngIf="dataInicio() && dataFim()"
+            class="btn btn-secondary btn-sm"
+            (click)="copiarDatasDisponiveis()"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8 2H16C17.1046 2 18 2.89543 18 4V6C18 7.10457 17.1046 8 16 8H8C6.89543 8 6 7.10457 6 6V4C6 2.89543 6.89543 2 8 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Copiar
+            Copiar Datas
           </button>
-        </div>
-        <div class="caixa-texto-content">
-          <pre>{{ gerarTextoFestas(item.espaco, item.festas) }}</pre>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Caixas de Texto das Datas Disponíveis -->
-  <div *ngIf="mostrarDatasDisponiveis()" class="caixas-texto-section">
+  <!-- Seção 3: Consulta de Data Específica -->
+  <div class="section-card">
     <div class="section-header">
       <div class="section-title">
-        <h2>Datas Disponíveis - Caixas de Texto</h2>
-        <span class="total-count">{{ getDatasDisponiveisPorEspaco().length }} espaço(s) com datas disponíveis</span>
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Consultar Data</h2>
       </div>
       <button
-        class="btn btn-secondary btn-sm"
-        (click)="mostrarDatasDisponiveis.set(false)"
-        title="Fechar seção de datas disponíveis"
+        class="btn btn-primary btn-sm"
+        (click)="alternarConsultaData()"
+        [title]="mostrarConsultaData() ? 'Ocultar detalhes' : 'Ver detalhes'"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg *ngIf="!mostrarConsultaData()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Fechar
+        <svg *ngIf="mostrarConsultaData()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ mostrarConsultaData() ? 'Ocultar' : 'Detalhar' }}
       </button>
     </div>
 
-    <div *ngIf="getDatasDisponiveisPorEspaco().length === 0" class="empty-state">
-      <p>Nenhuma data disponível encontrada no período selecionado.</p>
-    </div>
-
-    <div *ngIf="getDatasDisponiveisPorEspaco().length > 0" class="caixas-texto-grid">
-      <div *ngFor="let item of getDatasDisponiveisPorEspaco()" class="caixa-texto-card">
-        <div class="caixa-texto-header">
-          <h3>{{ item.espaco.nome }}</h3>
-          <button
-            class="btn btn-success btn-sm"
-            (click)="copiarTextoDatas(item.espaco, item.datas)"
-            title="Copiar texto das datas disponíveis"
+    <div *ngIf="mostrarConsultaData()" class="section-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dataConsulta">Data</label>
+          <input
+            type="date"
+            id="dataConsulta"
+            [(ngModel)]="dataConsulta"
+            class="form-control"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8 2H16C17.1046 2 18 2.89543 18 4V6C18 7.10457 17.1046 8 16 8H8C6.89543 8 6 7.10457 6 6V4C6 2.89543 6.89543 2 8 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Copiar
-          </button>
         </div>
-        <div class="caixa-texto-content">
-          <pre>{{ gerarTextoDatasDisponiveis(item.espaco, item.datas) }}</pre>
+
+        <div class="form-group">
+          <label for="espacoConsulta">Espaço</label>
+          <select
+            id="espacoConsulta"
+            [(ngModel)]="espacoConsulta"
+            class="form-control"
+          >
+            <option [value]="null">Selecione um espaço</option>
+            <option *ngFor="let espaco of espacos()" [value]="espaco.id">
+              {{ espaco.nome }}
+            </option>
+          </select>
         </div>
+      </div>
+
+      <button
+        class="btn btn-primary"
+        (click)="consultarData()"
+        [disabled]="loadingConsulta() || !dataConsulta() || !espacoConsulta()"
+      >
+        <svg *ngIf="loadingConsulta()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg *ngIf="!loadingConsulta()" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {{ loadingConsulta() ? 'Consultando...' : 'Consultar' }}
+      </button>
+
+      <div *ngIf="reservaEncontrada()" class="reserva-encontrada">
+        <h4>Reserva Encontrada</h4>
+        <div class="reserva-card">
+          <div class="reserva-info">
+            <h5>{{ reservaEncontrada()?.nomeCliente }}</h5>
+            <p><strong>Data:</strong> {{ formatarDataComDiaSemana(reservaEncontrada()!.dataFesta) }}</p>
+            <p><strong>Horário:</strong> {{ reservaEncontrada()?.horaInicio }} às {{ reservaEncontrada()?.horaFim }}</p>
+            <p><strong>Telefone:</strong> {{ reservaEncontrada()?.telefoneCliente }}</p>
+            <p><strong>CPF/CNPJ:</strong> {{ reservaEncontrada()?.cpfCliente ? formatarCPF(reservaEncontrada()!.cpfCliente) : 'N/A' }}</p>
+            <p><strong>Valor:</strong> {{ formatarValor(reservaEncontrada()!.valorPagamento) }}</p>
+            <p><strong>Pagamento:</strong>
+              <span [class]="getStatusPagamentoClass(reservaEncontrada()!)">
+                {{ getStatusPagamento(reservaEncontrada()!) }}
+              </span>
+            </p>
+            <p *ngIf="reservaEncontrada()?.valorRestante && reservaEncontrada()!.valorRestante! > 0">
+              <strong>Valor Restante:</strong> {{ formatarValor(reservaEncontrada()!.valorRestante!) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!reservaEncontrada() && !loadingConsulta() && dataConsulta() && espacoConsulta()" class="empty-state">
+        <p>Nenhuma reserva encontrada para a data e espaço selecionados.</p>
       </div>
     </div>
   </div>
@@ -193,11 +271,11 @@
   <div *ngIf="mostrarModalDatas()" class="modal-overlay" (click)="fecharModalDatas()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Configurar Período para Datas Disponíveis</h3>
-        <button class="modal-close" (click)="fecharModalDatas()" title="Fechar modal" aria-label="Fechar modal">
+        <h3>Configurar Período</h3>
+        <button class="btn-close" (click)="fecharModalDatas()" title="Fechar modal">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 18L18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
       </div>
@@ -241,131 +319,8 @@
         <button class="btn btn-secondary" (click)="fecharModalDatas()">
           Cancelar
         </button>
-        <button class="btn btn-primary" (click)="mostrarDatasDisponiveis.set(true); mostrarModalDatas.set(false)">
-          Gerar Relatório
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Lista de Festas -->
-  <div class="list-section">
-    <div class="section-header">
-      <h2>Festas Agendadas</h2>
-      <span class="total-count">{{ getReservasFiltradas().length }} festa(s) encontrada(s)</span>
-    </div>
-
-    <div *ngIf="loading()" class="loading">
-      <p>Carregando festas...</p>
-    </div>
-
-    <div *ngIf="!loading() && getReservasFiltradas().length === 0" class="empty-state">
-      <p>Nenhuma festa encontrada.</p>
-    </div>
-
-    <div *ngIf="!loading() && getReservasFiltradas().length > 0" class="festas-grid">
-      <div *ngFor="let reserva of getReservasPaginadas()" class="festa-card">
-        <!-- Cabeçalho do Card -->
-        <div class="festa-header">
-          <div class="festa-info">
-            <h3>{{ reserva.nomeCliente }}</h3>
-            <div class="festa-details">
-              <span class="espaco-festa">{{ getNomeEspaco(reserva) }}</span>
-              <span class="data-festa">{{ formatarDataComDiaSemana(reserva.dataFesta) }}</span>
-              <span class="status-pagamento" [class]="getStatusPagamentoClass(reserva)">
-                {{ getStatusPagamento(reserva) }}
-              </span>
-            </div>
-          </div>
-          <button
-            class="btn btn-primary btn-sm"
-            (click)="alternarDetalhes(reserva.id!)"
-            [title]="reservaExpandida() === reserva.id ? 'Ocultar detalhes' : 'Ver detalhes'"
-          >
-            <svg *ngIf="reservaExpandida() !== reserva.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <svg *ngIf="reservaExpandida() === reserva.id" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            {{ reservaExpandida() === reserva.id ? 'Ocultar' : 'Detalhar' }}
-          </button>
-        </div>
-
-        <!-- Detalhes Expandidos -->
-        <div *ngIf="reservaExpandida() === reserva.id" class="festa-details-expanded">
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="label">CPF/CNPJ:</span>
-              <span class="value">{{ formatarCPF(reserva.cpfCliente) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Telefone:</span>
-              <span class="value">{{ reserva.telefoneCliente }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Horário:</span>
-              <span class="value">{{ reserva.horaInicio }} - {{ reserva.horaFim }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Valor:</span>
-              <span class="value valor">{{ formatarValor(reserva.valorPagamento) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="reserva.valorRestante && reserva.valorRestante > 0">
-              <span class="label">Valor Restante:</span>
-              <span class="value valor">{{ formatarValor(reserva.valorRestante) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="reserva.createdAt">
-              <span class="label">Criado em:</span>
-              <span class="value">{{ reserva.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Paginação -->
-    <div *ngIf="!loading() && getReservasFiltradas().length > 0 && getTotalPaginas() > 1" class="pagination-section">
-      <div class="pagination-info">
-        <span>
-          Página {{ paginaAtual() }} de {{ getTotalPaginas() }}
-          ({{ getReservasFiltradas().length }} festa(s) no total)
-        </span>
-      </div>
-
-      <div class="pagination-controls">
-        <button
-          class="btn btn-secondary btn-sm"
-          [disabled]="paginaAtual() === 1"
-          (click)="paginaAnterior()"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Anterior
-        </button>
-
-        <div class="pagination-numbers">
-          <button
-            *ngFor="let pagina of getPaginas()"
-            class="btn btn-sm"
-            [class.btn-primary]="pagina === paginaAtual()"
-            [class.btn-secondary]="pagina !== paginaAtual()"
-            (click)="irParaPagina(pagina)"
-          >
-            {{ pagina }}
-          </button>
-        </div>
-
-        <button
-          class="btn btn-secondary btn-sm"
-          [disabled]="paginaAtual() === getTotalPaginas()"
-          (click)="proximaPagina()"
-        >
-          Próxima
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <button class="btn btn-primary" (click)="fecharModalDatas()">
+          Aplicar
         </button>
       </div>
     </div>
