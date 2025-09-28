@@ -4,8 +4,22 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// Forçar layout horizontal para a navbar
+.navbar .navbar-nav {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+.navbar .nav-item {
+  display: inline-block !important;
+  flex-shrink: 0 !important;
 }
 
 .navbar-container {
@@ -72,42 +86,51 @@
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px; // Reduzir gap para economizar espaço
   list-style: none;
   margin: 0;
   padding: 0;
   transition: all 0.3s ease;
+  flex-wrap: nowrap; // Garantir que não quebre linha
+  white-space: nowrap; // Evitar quebra de texto
+  flex-direction: row; // Forçar direção horizontal
 
   @media (max-width: 768px) {
-    position: fixed;
+    position: fixed !important;
     top: 70px;
     left: 0;
     right: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    flex-direction: column;
+    flex-direction: column !important; // Apenas em mobile usar coluna
     padding: 20px;
     transform: translateX(-100%);
     opacity: 0;
     visibility: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+    flex-wrap: wrap; // Permitir quebra em mobile
   }
 }
 
 .nav-item {
+  display: inline-block; // Garantir que os itens fiquem lado a lado
+  flex-shrink: 0; // Evitar que encolham
+
   .nav-link {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
+    gap: 6px; // Reduzir gap entre ícone e texto
+    padding: 10px 16px; // Reduzir padding para economizar espaço
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-weight: 500;
-    font-size: 15px;
-    border-radius: 12px;
+    font-size: 14px; // Reduzir tamanho da fonte
+    border-radius: 10px;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    white-space: nowrap; // Evitar quebra de texto
 
     &::before {
       content: '';
@@ -151,6 +174,9 @@
 
     svg {
       transition: transform 0.3s ease;
+      width: 18px; // Reduzir tamanho dos ícones
+      height: 18px;
+      flex-shrink: 0; // Evitar que o ícone encolha
     }
 
     &:hover svg {
@@ -158,7 +184,7 @@
     }
 
     @media (max-width: 768px) {
-      width: 100%;
+      width: 100% !important;
       justify-content: center;
       padding: 16px 20px;
       margin: 4px 0;
@@ -243,8 +269,22 @@
   right: 0;
   bottom: 0;
   background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   z-index: -1;
+}
+
+// Garantir que os itens fiquem horizontais em telas maiores
+@media (min-width: 769px) {
+  .navbar-nav {
+    flex-direction: row !important; // Forçar horizontal
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .nav-item {
+    display: inline-block !important;
+  }
 }
 
 // Responsividade aprimorada
@@ -255,6 +295,31 @@
 
   .brand-text {
     font-size: 20px;
+  }
+
+  .navbar-nav {
+    gap: 2px; // Reduzir ainda mais o gap em telas médias
+  }
+
+  .nav-item .nav-link {
+    padding: 8px 12px; // Reduzir padding em telas médias
+    font-size: 13px; // Reduzir fonte em telas médias
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar-nav {
+    gap: 1px; // Gap mínimo
+  }
+
+  .nav-item .nav-link {
+    padding: 8px 10px; // Padding mínimo
+    font-size: 12px; // Fonte menor
+  }
+
+  .nav-item .nav-link svg {
+    width: 16px; // Ícones menores
+    height: 16px;
   }
 }
 
@@ -274,6 +339,18 @@
   }
 }
 
+@media (max-width: 600px) {
+  .nav-item .nav-link {
+    padding: 8px 8px; // Padding ainda menor
+    font-size: 11px; // Fonte muito pequena
+  }
+
+  .nav-item .nav-link svg {
+    width: 14px; // Ícones muito pequenos
+    height: 14px;
+  }
+}
+
 @media (max-width: 480px) {
   .navbar-container {
     padding: 0 12px;
@@ -281,5 +358,15 @@
 
   .brand-text {
     display: none;
+  }
+
+  .nav-item .nav-link {
+    padding: 6px 6px; // Padding mínimo
+    font-size: 10px; // Fonte mínima
+  }
+
+  .nav-item .nav-link svg {
+    width: 12px; // Ícones mínimos
+    height: 12px;
   }
 }

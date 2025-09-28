@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-navbar',
   imports: [RouterModule, CommonModule],
   templateUrl: './navbar.html',
-  styleUrl: './navbar.scss'
+  styleUrls: ['./navbar.scss', './navbar-fix.scss']
 })
 export class Navbar {
   menuOpen = signal<boolean>(false);

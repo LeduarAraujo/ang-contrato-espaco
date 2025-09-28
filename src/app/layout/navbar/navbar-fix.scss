@@ -1,0 +1,60 @@
+/* Fix específico para garantir que a navbar seja horizontal */
+
+/* Forçar layout horizontal em todas as telas maiores que 768px */
+@media (min-width: 769px) {
+  .navbar .navbar-menu .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+  }
+
+  .navbar .navbar-menu .navbar-nav .nav-item {
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
+  }
+
+  .navbar .navbar-menu .navbar-nav .nav-item .nav-link {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    width: auto !important;
+    padding: 10px 16px !important;
+  }
+}
+
+/* Garantir que em mobile use coluna */
+@media (max-width: 768px) {
+  .navbar .navbar-menu .navbar-nav {
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: 20px !important;
+    transform: translateX(-100%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .navbar .navbar-menu.active .navbar-nav {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .navbar .navbar-menu .navbar-nav .nav-item {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .navbar .navbar-menu .navbar-nav .nav-item .nav-link {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 16px 20px !important;
+    margin: 4px 0 !important;
+  }
+}
