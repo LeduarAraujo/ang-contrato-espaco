@@ -19,7 +19,9 @@ export class CadastroEspaco implements OnInit {
   // Formulário
   novoEspaco: Espaco = {
     nome: '',
-    logoUrl: ''
+    logoUrl: '',
+    nomeProprietario: '',
+    cnpjProprietario: ''
   };
 
   selectedFile: File | null = null;
@@ -64,7 +66,9 @@ export class CadastroEspaco implements OnInit {
       // Usar o novo método que faz upload e cadastro em uma única requisição
       const espacoSalvo = await this.espacoService.criarEspacoComImagem(
         this.novoEspaco.nome,
-        this.selectedFile
+        this.selectedFile,
+        this.novoEspaco.nomeProprietario,
+        this.novoEspaco.cnpjProprietario
       ).toPromise();
 
       console.log('Espaço salvo com sucesso:', espacoSalvo);
@@ -76,7 +80,9 @@ export class CadastroEspaco implements OnInit {
       // Limpar formulário
       this.novoEspaco = {
         nome: '',
-        logoUrl: ''
+        logoUrl: '',
+        nomeProprietario: '',
+        cnpjProprietario: ''
       };
       this.selectedFile = null;
       this.imagePreview = null;

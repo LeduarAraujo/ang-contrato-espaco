@@ -23,6 +23,31 @@
         </div>
 
         <div class="form-group">
+          <label for="nomeProprietario">Nome do Proprietário</label>
+          <input
+            type="text"
+            id="nomeProprietario"
+            name="nomeProprietario"
+            [(ngModel)]="novoEspaco.nomeProprietario"
+            placeholder="Ex: João Silva"
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="cnpjProprietario">CNPJ do Proprietário</label>
+          <input
+            type="text"
+            id="cnpjProprietario"
+            name="cnpjProprietario"
+            [(ngModel)]="novoEspaco.cnpjProprietario"
+            placeholder="00.000.000/0000-00"
+            class="form-control"
+            maxlength="18"
+          >
+        </div>
+
+        <div class="form-group">
           <label for="logoFile">Logo do Espaço</label>
           <input
             type="file"

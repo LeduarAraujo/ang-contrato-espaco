@@ -31,11 +31,21 @@ export class EspacoService {
     return this.http.post<Espaco>(getFullUrl(API_CONFIG.ESPACOS.CRIAR), espaco);
   }
 
-  criarEspacoComImagem(nome: string, logo: File | null): Observable<Espaco> {
+  criarEspacoComImagem(nome: string, logo: File | null, nomeProprietario?: string, cnpjProprietario?: string): Observable<Espaco> {
     console.log('EspacoService: Criando espaço com imagem:', nome);
+    console.log('EspacoService: Nome do proprietário:', nomeProprietario);
+    console.log('EspacoService: CNPJ do proprietário:', cnpjProprietario);
 
     const formData = new FormData();
     formData.append('nome', nome);
+
+    if (nomeProprietario) {
+      formData.append('nomeProprietario', nomeProprietario);
+    }
+
+    if (cnpjProprietario) {
+      formData.append('cnpjProprietario', cnpjProprietario);
+    }
 
     if (logo) {
       formData.append('logo', logo);
