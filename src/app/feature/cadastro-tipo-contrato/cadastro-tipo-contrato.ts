@@ -23,6 +23,7 @@ export class CadastroTipoContrato implements OnInit {
   novoTipoContrato: TipoContrato = {
     espacoId: 0,
     tipo: 'CONTRATO',
+    titulo: '',
     textoTemplate: ''
   };
 
@@ -31,6 +32,7 @@ export class CadastroTipoContrato implements OnInit {
     '{nome}',
     '{cpf}',
     '{valor}',
+    '{valorExtenso}',
     '{dataFesta}',
     '{horaInicio}',
     '{horaFim}'
@@ -92,6 +94,11 @@ export class CadastroTipoContrato implements OnInit {
       return;
     }
 
+    if (!this.novoTipoContrato.titulo.trim()) {
+      console.warn('Título é obrigatório');
+      return;
+    }
+
     if (!this.novoTipoContrato.textoTemplate.trim()) {
       console.warn('Texto do template é obrigatório');
       return;
@@ -106,6 +113,7 @@ export class CadastroTipoContrato implements OnInit {
       this.novoTipoContrato = {
         espacoId: 0,
         tipo: 'CONTRATO',
+        titulo: '',
         textoTemplate: ''
       };
 

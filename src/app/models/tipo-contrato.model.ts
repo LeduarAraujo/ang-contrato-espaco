@@ -3,6 +3,7 @@ export interface TipoContrato {
   espacoId: number;
   espacoNome?: string;
   tipo: 'CONTRATO' | 'RECIBO';
+  titulo: string;
   textoTemplate: string;
   createdAt?: string;
   updatedAt?: string;

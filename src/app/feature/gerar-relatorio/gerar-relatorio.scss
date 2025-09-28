@@ -64,6 +64,27 @@
       border-color: #3498db;
     }
   }
+
+  .form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6c757d;
+  }
+
+  .data-preview, .valor-preview {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+
+    .form-text {
+      margin: 0;
+      color: #495057;
+      font-weight: 500;
+    }
+  }
 }
 
 .checkbox-label {
@@ -195,6 +216,13 @@
         font-weight: 700;
         color: #27ae60;
         font-size: 16px;
+      }
+
+      &.valor-extenso {
+        font-style: italic;
+        color: #6c757d;
+        font-size: 13px;
+        line-height: 1.4;
       }
 
       &.integral {

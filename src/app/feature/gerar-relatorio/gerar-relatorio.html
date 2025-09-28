@@ -41,17 +41,19 @@
         </div>
 
         <div class="form-group">
-          <label for="cpfCliente">CPF do Cliente *</label>
+          <label for="cpfCliente">CPF/CNPJ do Cliente *</label>
           <input
             type="text"
             id="cpfCliente"
             name="cpfCliente"
             [(ngModel)]="novoRelatorio.cpfCliente"
+            (input)="onCpfInput($event)"
             required
-            placeholder="000.000.000-00"
-            maxlength="14"
+            placeholder="000.000.000-00 ou 00.000.000/0000-00"
+            maxlength="18"
             class="form-control"
           >
+          <small class="form-text">Digite 11 dígitos para CPF ou 14 dígitos para CNPJ</small>
         </div>
       </div>
 
@@ -63,9 +65,13 @@
             id="dataFesta"
             name="dataFesta"
             [(ngModel)]="novoRelatorio.dataFesta"
+            (change)="onDataChange($event)"
             required
             class="form-control"
           >
+          <div *ngIf="novoRelatorio.dataFesta" class="data-preview">
+            <small class="form-text">{{ formatarDataComDiaSemana(novoRelatorio.dataFesta) }}</small>
+          </div>
         </div>
 
         <div class="form-group">
@@ -75,12 +81,16 @@
             id="valorPago"
             name="valorPago"
             [(ngModel)]="novoRelatorio.valorPago"
+            (input)="onValorChange($event)"
             required
             min="0.01"
             step="0.01"
             placeholder="0,00"
             class="form-control"
           >
+          <div *ngIf="novoRelatorio.valorPago > 0" class="valor-preview">
+            <small class="form-text">{{ formatarValorPorExtenso(novoRelatorio.valorPago) }}</small>
+          </div>
         </div>
       </div>
 
@@ -202,12 +212,12 @@
               <span class="value">{{ getTipoContratoInfo(relatorio.tipoContratoId).espaco }}</span>
             </div>
             <div class="detail-row">
-              <span class="label">CPF:</span>
+              <span class="label">CPF/CNPJ:</span>
               <span class="value">{{ formatarCPF(relatorio.cpfCliente) }}</span>
             </div>
             <div class="detail-row">
               <span class="label">Data da Festa:</span>
-              <span class="value">{{ relatorio.dataFesta | date:'dd/MM/yyyy' }}</span>
+              <span class="value">{{ formatarDataComDiaSemana(relatorio.dataFesta) }}</span>
             </div>
             <div class="detail-row">
               <span class="label">Horário:</span>
@@ -216,6 +226,10 @@
             <div class="detail-row">
               <span class="label">Valor:</span>
               <span class="value valor">{{ formatarValor(relatorio.valorPago) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Valor por extenso:</span>
+              <span class="value valor-extenso">{{ formatarValorPorExtenso(relatorio.valorPago) }}</span>
             </div>
             <div class="detail-row">
               <span class="label">Pagamento:</span>

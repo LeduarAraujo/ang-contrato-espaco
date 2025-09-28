@@ -41,6 +41,20 @@
       </div>
 
       <div class="form-group">
+        <label for="titulo">Título *</label>
+        <input
+          type="text"
+          id="titulo"
+          name="titulo"
+          [(ngModel)]="novoTipoContrato.titulo"
+          required
+          placeholder="Ex: Contrato de Locação, Recibo de Pagamento..."
+          class="form-control"
+        >
+        <small class="form-text">Este título aparecerá no topo do documento gerado</small>
+      </div>
+
+      <div class="form-group">
         <label for="textoTemplate">Texto do Template *</label>
 
         <!-- Legenda dos Placeholders -->
@@ -97,10 +111,13 @@
       <div *ngFor="let tipoContrato of tiposContrato()" class="tipo-contrato-card">
         <div class="tipo-contrato-header">
           <div class="tipo-contrato-info">
-            <h3>{{ getEspacoNome(tipoContrato.espacoId) }}</h3>
-            <span class="tipo-badge" [class.contrato]="tipoContrato.tipo === 'CONTRATO'" [class.recibo]="tipoContrato.tipo === 'RECIBO'">
-              {{ tipoContrato.tipo }}
-            </span>
+            <h3>{{ tipoContrato.titulo }}</h3>
+            <div class="tipo-contrato-details">
+              <span class="espaco-info">{{ getEspacoNome(tipoContrato.espacoId) }}</span>
+              <span class="tipo-badge" [class.contrato]="tipoContrato.tipo === 'CONTRATO'" [class.recibo]="tipoContrato.tipo === 'RECIBO'">
+                {{ tipoContrato.tipo }}
+              </span>
+            </div>
           </div>
           <button
             class="btn btn-danger btn-sm"

@@ -116,7 +116,34 @@ export class GerarRelatorio implements OnInit {
   }
 
   formatarCPF(cpf: string): string {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    // Remove todos os caracteres não numéricos
+    const numeros = cpf.replace(/\D/g, '');
+
+    // Aplica máscara baseada no tamanho
+    if (numeros.length <= 11) {
+      // CPF: 000.000.000-00
+      return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      // CNPJ: 00.000.000/0000-00
+      return numeros.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+  }
+
+  onCpfInput(event: any): void {
+    const input = event.target;
+    const valor = input.value.replace(/\D/g, '');
+
+    // Aplica a máscara
+    const valorFormatado = this.formatarCPF(valor);
+    input.value = valorFormatado;
+
+    // Atualiza o modelo
+    this.novoRelatorio.cpfCliente = valor;
+  }
+
+  validarCpfCnpj(cpfCnpj: string): boolean {
+    const numeros = cpfCnpj.replace(/\D/g, '');
+    return numeros.length === 11 || numeros.length === 14;
   }
 
   formatarValor(valor: number): string {
@@ -124,6 +151,103 @@ export class GerarRelatorio implements OnInit {
       style: 'currency',
       currency: 'BRL'
     }).format(valor);
+  }
+
+  formatarDataComDiaSemana(data: string): string {
+    if (!data) return '';
+
+    const dataObj = new Date(data + 'T00:00:00');
+    const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+    const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+
+    // Capitaliza a primeira letra do dia da semana
+    const diaSemanaCapitalizado = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
+
+    return `${dataFormatada} (${diaSemanaCapitalizado})`;
+  }
+
+  formatarValorPorExtenso(valor: number): string {
+    const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+    const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+    const dezenasEspeciais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+    const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+    if (valor === 0) return 'zero reais';
+    if (valor < 0) return 'valor inválido';
+
+    let inteiro = Math.floor(valor);
+    let decimal = Math.round((valor - inteiro) * 100);
+
+    let resultado = '';
+
+    // Centenas
+    if (inteiro >= 100) {
+      const centena = Math.floor(inteiro / 100);
+      if (centena === 1 && inteiro === 100) {
+        resultado += 'cem';
+      } else {
+        resultado += centenas[centena];
+      }
+      inteiro = inteiro % 100;
+      if (inteiro > 0) resultado += ' e ';
+    }
+
+    // Dezenas
+    if (inteiro >= 20) {
+      const dezena = Math.floor(inteiro / 10);
+      resultado += dezenas[dezena];
+      inteiro = inteiro % 10;
+      if (inteiro > 0) resultado += ' e ';
+    } else if (inteiro >= 10) {
+      resultado += dezenasEspeciais[inteiro - 10];
+      inteiro = 0;
+    }
+
+    // Unidades
+    if (inteiro > 0) {
+      resultado += unidades[inteiro];
+    }
+
+    // Plural
+    if (inteiro !== 1) {
+      resultado += ' reais';
+    } else {
+      resultado += ' real';
+    }
+
+    // Centavos
+    if (decimal > 0) {
+      resultado += ' e ';
+      if (decimal >= 20) {
+        const dezenaCent = Math.floor(decimal / 10);
+        resultado += dezenas[dezenaCent];
+        decimal = decimal % 10;
+        if (decimal > 0) resultado += ' e ';
+      } else if (decimal >= 10) {
+        resultado += dezenasEspeciais[decimal - 10];
+        decimal = 0;
+      }
+      if (decimal > 0) {
+        resultado += unidades[decimal];
+      }
+      if (decimal !== 1) {
+        resultado += ' centavos';
+      } else {
+        resultado += ' centavo';
+      }
+    }
+
+    return resultado;
+  }
+
+  onDataChange(event: any): void {
+    const data = event.target.value;
+    this.novoRelatorio.dataFesta = data;
+  }
+
+  onValorChange(event: any): void {
+    const valor = parseFloat(event.target.value) || 0;
+    this.novoRelatorio.valorPago = valor;
   }
 
   async salvarRelatorio() {
@@ -138,7 +262,12 @@ export class GerarRelatorio implements OnInit {
     }
 
     if (!this.novoRelatorio.cpfCliente.trim()) {
-      console.warn('CPF do cliente é obrigatório');
+      console.warn('CPF/CNPJ do cliente é obrigatório');
+      return;
+    }
+
+    if (!this.validarCpfCnpj(this.novoRelatorio.cpfCliente)) {
+      console.warn('CPF/CNPJ inválido. Digite 11 dígitos para CPF ou 14 dígitos para CNPJ');
       return;
     }
 
