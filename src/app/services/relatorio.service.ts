@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Relatorio } from '../models/relatorio.model';
 import { API_CONFIG, getFullUrl } from '../config/api.config';
 
@@ -53,9 +54,25 @@ export class RelatorioService {
     return this.http.delete<void>(getFullUrl(API_CONFIG.RELATORIOS.EXCLUIR, { id }));
   }
 
-  gerarPdf(id: number): Observable<Blob> {
+  gerarPdf(id: number): Observable<{blob: Blob, filename: string}> {
     return this.http.get(getFullUrl(API_CONFIG.RELATORIOS.BUSCAR, { id }) + '/pdf', {
-      responseType: 'blob'
-    });
+      responseType: 'blob',
+      observe: 'response'
+    }).pipe(
+      map(response => {
+        const blob = response.body!;
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `relatorio_${id}.pdf`;
+
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+          if (filenameMatch) {
+            filename = filenameMatch[1];
+          }
+        }
+
+        return { blob, filename };
+      })
+    );
   }
 }

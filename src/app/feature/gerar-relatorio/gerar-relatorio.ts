@@ -349,16 +349,16 @@ export class GerarRelatorio implements OnInit {
   async baixarPdf(id: number) {
     try {
       console.log('Gerando PDF para relatório ID:', id);
-      const blob = await this.relatorioService.gerarPdf(id).toPromise();
+      const result = await this.relatorioService.gerarPdf(id).toPromise();
 
-      if (blob) {
+      if (result) {
         // Criar URL do blob
-        const url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(result.blob);
 
         // Criar elemento de download
         const link = document.createElement('a');
         link.href = url;
-        link.download = `relatorio_${id}.pdf`;
+        link.download = result.filename;
 
         // Adicionar ao DOM, clicar e remover
         document.body.appendChild(link);
@@ -368,7 +368,7 @@ export class GerarRelatorio implements OnInit {
         // Limpar URL do blob
         window.URL.revokeObjectURL(url);
 
-        console.log('PDF baixado com sucesso!');
+        console.log('PDF baixado com sucesso! Nome do arquivo:', result.filename);
       }
     } catch (error) {
       console.error('Erro ao baixar PDF:', error);
