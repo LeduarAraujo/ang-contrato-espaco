@@ -21,14 +21,40 @@
         </svg>
         {{ filtroSemana() ? 'Todas as Festas' : 'Festas da Semana' }}
       </button>
+      <button
+        class="btn btn-info"
+        (click)="abrirModalDatas()"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 2V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Datas Disponíveis
+      </button>
     </div>
   </div>
 
   <!-- Caixas de Texto das Festas da Semana -->
   <div *ngIf="mostrarCaixasTexto()" class="caixas-texto-section">
     <div class="section-header">
-      <h2>Festas da Semana - Caixas de Texto</h2>
-      <span class="total-count">{{ getFestasPorEspaco().length }} espaço(s) com festas</span>
+      <div class="section-title">
+        <h2>Festas da Semana - Caixas de Texto</h2>
+        <span class="total-count">{{ getFestasPorEspaco().length }} espaço(s) com festas</span>
+      </div>
+      <button
+        class="btn btn-secondary btn-sm"
+        (click)="ativarFiltroSemana()"
+        title="Fechar seção de festas da semana"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Fechar
+      </button>
     </div>
 
     <div *ngIf="getFestasPorEspaco().length === 0" class="empty-state">
@@ -54,6 +80,112 @@
         <div class="caixa-texto-content">
           <pre>{{ gerarTextoFestas(item.espaco, item.festas) }}</pre>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Caixas de Texto das Datas Disponíveis -->
+  <div *ngIf="mostrarDatasDisponiveis()" class="caixas-texto-section">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>Datas Disponíveis - Caixas de Texto</h2>
+        <span class="total-count">{{ getDatasDisponiveisPorEspaco().length }} espaço(s) com datas disponíveis</span>
+      </div>
+      <button
+        class="btn btn-secondary btn-sm"
+        (click)="mostrarDatasDisponiveis.set(false)"
+        title="Fechar seção de datas disponíveis"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Fechar
+      </button>
+    </div>
+
+    <div *ngIf="getDatasDisponiveisPorEspaco().length === 0" class="empty-state">
+      <p>Nenhuma data disponível encontrada no período selecionado.</p>
+    </div>
+
+    <div *ngIf="getDatasDisponiveisPorEspaco().length > 0" class="caixas-texto-grid">
+      <div *ngFor="let item of getDatasDisponiveisPorEspaco()" class="caixa-texto-card">
+        <div class="caixa-texto-header">
+          <h3>{{ item.espaco.nome }}</h3>
+          <button
+            class="btn btn-success btn-sm"
+            (click)="copiarTextoDatas(item.espaco, item.datas)"
+            title="Copiar texto das datas disponíveis"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 2H16C17.1046 2 18 2.89543 18 4V6C18 7.10457 17.1046 8 16 8H8C6.89543 8 6 7.10457 6 6V4C6 2.89543 6.89543 2 8 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Copiar
+          </button>
+        </div>
+        <div class="caixa-texto-content">
+          <pre>{{ gerarTextoDatasDisponiveis(item.espaco, item.datas) }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configuração de Datas -->
+  <div *ngIf="mostrarModalDatas()" class="modal-overlay" (click)="fecharModalDatas()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Configurar Período para Datas Disponíveis</h3>
+        <button class="modal-close" (click)="fecharModalDatas()" title="Fechar modal" aria-label="Fechar modal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="dataInicio">Data de Início</label>
+          <input
+            type="date"
+            id="dataInicio"
+            [(ngModel)]="dataInicio"
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="dataFim">Data de Fim</label>
+          <input
+            type="date"
+            id="dataFim"
+            [(ngModel)]="dataFim"
+            class="form-control"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="tipoDias">Tipo de Dias</label>
+          <select
+            id="tipoDias"
+            [(ngModel)]="tipoDias"
+            class="form-control"
+          >
+            <option value="todos">Todos os dias</option>
+            <option value="finais">Finais de semana</option>
+            <option value="dias-semana">Dias de semana</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharModalDatas()">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="gerarRelatorioDatasDisponiveis()">
+          Gerar Relatório
+        </button>
       </div>
     </div>
   </div>

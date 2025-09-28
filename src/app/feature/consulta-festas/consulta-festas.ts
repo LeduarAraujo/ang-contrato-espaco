@@ -25,6 +25,13 @@ export class ConsultaFestas implements OnInit {
   // Filtros
   filtroSemana = signal<boolean>(false);
   mostrarCaixasTexto = signal<boolean>(false);
+  mostrarDatasDisponiveis = signal<boolean>(false);
+  mostrarModalDatas = signal<boolean>(false);
+
+  // Configurações do modal de datas
+  dataInicio = signal<string>('');
+  dataFim = signal<string>('');
+  tipoDias = signal<'todos' | 'finais' | 'dias-semana'>('todos');
 
   constructor(
     private relatorioService: RelatorioService,
@@ -230,5 +237,159 @@ export class ConsultaFestas implements OnInit {
   ativarFiltroSemana() {
     this.filtroSemana.set(!this.filtroSemana());
     this.mostrarCaixasTexto.set(this.filtroSemana());
+  }
+
+  // Métodos para datas disponíveis
+  abrirModalDatas() {
+    // Definir datas padrão (próximos 30 dias)
+    const hoje = new Date();
+    const dataFim = new Date();
+    dataFim.setDate(hoje.getDate() + 30);
+
+    this.dataInicio.set(hoje.toISOString().split('T')[0]);
+    this.dataFim.set(dataFim.toISOString().split('T')[0]);
+    this.tipoDias.set('todos');
+    this.mostrarModalDatas.set(true);
+  }
+
+  fecharModalDatas() {
+    this.mostrarModalDatas.set(false);
+  }
+
+  gerarRelatorioDatasDisponiveis() {
+    if (!this.dataInicio() || !this.dataFim()) {
+      console.warn('Selecione as datas de início e fim');
+      return;
+    }
+
+    if (new Date(this.dataInicio()) > new Date(this.dataFim())) {
+      console.warn('Data de início deve ser anterior à data de fim');
+      return;
+    }
+
+    this.mostrarDatasDisponiveis.set(true);
+    this.mostrarModalDatas.set(false);
+  }
+
+  getDatasDisponiveisPorEspaco(): { espaco: Espaco, datas: string[] }[] {
+    const datasDisponiveis: { [key: number]: string[] } = {};
+    const espacos = this.espacos();
+
+    // Inicializar array de datas para cada espaço
+    espacos.forEach(espaco => {
+      datasDisponiveis[espaco.id!] = [];
+    });
+
+    // Gerar todas as datas no período
+    const dataInicio = new Date(this.dataInicio());
+    const dataFim = new Date(this.dataFim());
+    const todasAsDatas: string[] = [];
+
+    for (let data = new Date(dataInicio); data <= dataFim; data.setDate(data.getDate() + 1)) {
+      const dataStr = data.toISOString().split('T')[0];
+      todasAsDatas.push(dataStr);
+    }
+
+    // Filtrar datas por tipo de dia
+    const datasFiltradas = this.filtrarDatasPorTipo(todasAsDatas);
+
+    // Para cada espaço, verificar quais datas não têm festas
+    espacos.forEach(espaco => {
+      const tiposContratoEspaco = this.tiposContrato().filter(tc => tc.espacoId === espaco.id);
+      const idsTiposContrato = tiposContratoEspaco.map(tc => tc.id!);
+
+      datasFiltradas.forEach(data => {
+        const temFesta = this.relatorios().some(relatorio =>
+          relatorio.dataFesta === data && idsTiposContrato.includes(relatorio.tipoContratoId)
+        );
+
+        if (!temFesta) {
+          datasDisponiveis[espaco.id!].push(data);
+        }
+      });
+    });
+
+    // Converter para array e filtrar espaços com datas disponíveis
+    return Object.keys(datasDisponiveis).map(espacoId => {
+      const espaco = espacos.find(e => e.id === parseInt(espacoId));
+      const datas = datasDisponiveis[parseInt(espacoId)];
+      return { espaco: espaco!, datas };
+    }).filter(item => item.espaco && item.datas.length > 0);
+  }
+
+  filtrarDatasPorTipo(datas: string[]): string[] {
+    const tipo = this.tipoDias();
+
+    if (tipo === 'todos') {
+      return datas;
+    }
+
+    return datas.filter(data => {
+      const dataObj = new Date(data + 'T00:00:00');
+      const diaSemana = dataObj.getDay(); // 0=domingo, 1=segunda, ..., 6=sábado
+
+      if (tipo === 'finais') {
+        return diaSemana === 0 || diaSemana === 6; // Domingo ou sábado
+      } else if (tipo === 'dias-semana') {
+        return diaSemana >= 1 && diaSemana <= 5; // Segunda a sexta
+      }
+
+      return true;
+    });
+  }
+
+  gerarTextoDatasDisponiveis(espaco: Espaco, datas: string[]): string {
+    let texto = `DATAS DISPONÍVEIS - ${espaco.nome.toUpperCase()}\n`;
+    texto += `${'='.repeat(50)}\n\n`;
+
+    if (datas.length === 0) {
+      texto += 'Nenhuma data disponível no período selecionado.\n';
+      return texto;
+    }
+
+    // Agrupar datas por mês
+    const datasPorMes: { [key: string]: string[] } = {};
+
+    datas.forEach(data => {
+      const dataObj = new Date(data + 'T00:00:00');
+      const mesAno = `${dataObj.getMonth() + 1}/${dataObj.getFullYear()}`;
+
+      if (!datasPorMes[mesAno]) {
+        datasPorMes[mesAno] = [];
+      }
+      datasPorMes[mesAno].push(data);
+    });
+
+    // Ordenar meses
+    const mesesOrdenados = Object.keys(datasPorMes).sort((a, b) => {
+      const [mesA, anoA] = a.split('/').map(Number);
+      const [mesB, anoB] = b.split('/').map(Number);
+      return anoA - anoB || mesA - mesB;
+    });
+
+    mesesOrdenados.forEach(mesAno => {
+      const datasDoMes = datasPorMes[mesAno].sort();
+
+      datasDoMes.forEach(data => {
+        const dataObj = new Date(data + 'T00:00:00');
+        const dia = String(dataObj.getDate()).padStart(2, '0');
+        const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+        texto += `${dia}/${mes}\n`;
+      });
+    });
+
+    return texto;
+  }
+
+  async copiarTextoDatas(espaco: Espaco, datas: string[]) {
+    const texto = this.gerarTextoDatasDisponiveis(espaco, datas);
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      console.log('Texto copiado para a área de transferência!');
+    } catch (error) {
+      console.error('Erro ao copiar texto:', error);
+      this.copiarTextoFallback(texto);
+    }
   }
 }
