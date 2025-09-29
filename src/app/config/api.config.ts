@@ -4,7 +4,7 @@
  */
 export const API_CONFIG = {
   // Base URL da API
-  BASE_URL: 'https://atom-contrato-espaco-b50858f32cd7.herokuapp.com/api',
+  BASE_URL: 'https://atom-contrato-espaco-2bc77572d2a3.herokuapp.com/api',
 
   // Endpoints para Espaços
   ESPACOS: {
