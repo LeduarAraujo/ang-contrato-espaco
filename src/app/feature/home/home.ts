@@ -38,6 +38,8 @@ export class Home implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Limpar cache e forçar nova consulta
+    this.espacoSelecionadoService.forcarNovaConsulta();
     this.carregarDados();
     this.carregarEspacos();
   }
@@ -75,9 +77,16 @@ export class Home implements OnInit {
     try {
       const espacos = await this.espacoService.listarEspacos().toPromise();
       this.espacos.set(espacos || []);
+
+      // Validar se o espaço em cache ainda existe na base atual
+      this.espacoSelecionadoService.validarEspacoEmCache(espacos || []);
+
+      console.log('Espaços carregados:', espacos?.length || 0);
     } catch (error) {
       console.error('Erro ao carregar espaços:', error);
       this.espacos.set([]);
+      // Em caso de erro, limpar cache para evitar dados inconsistentes
+      this.espacoSelecionadoService.limparCache();
     } finally {
       this.espacosLoading.set(false);
     }
@@ -183,6 +192,20 @@ export class Home implements OnInit {
     }
     // Senão, usar logoUrl se existir
     return espaco.logoUrl || null;
+  }
+
+  // Método para limpar cache manualmente (útil para debug)
+  limparCache() {
+    this.espacoSelecionadoService.limparCache();
+    console.log('Cache limpo manualmente');
+  }
+
+  // Método para recarregar dados (útil quando a base é limpa)
+  async recarregarDados() {
+    console.log('Recarregando dados...');
+    this.espacoSelecionadoService.forcarNovaConsulta();
+    await this.carregarEspacos();
+    await this.carregarDados();
   }
 }
 

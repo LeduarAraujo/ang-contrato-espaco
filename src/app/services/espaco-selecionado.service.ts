@@ -132,4 +132,37 @@ export class EspacoSelecionadoService {
       console.error('Erro ao remover espaço do localStorage:', error);
     }
   }
+
+  /**
+   * Limpa completamente o cache (espaço selecionado e localStorage)
+   */
+  limparCache(): void {
+    this.espacoSelecionado.set(null);
+    this.removerEspacoDoLocalStorage();
+    console.log('Cache de espaço selecionado limpo');
+  }
+
+  /**
+   * Valida se o espaço em cache ainda existe na lista atual de espaços
+   */
+  validarEspacoEmCache(espacosAtuais: Espaco[]): boolean {
+    const espacoCache = this.espacoSelecionado();
+    if (!espacoCache) return true; // Se não há cache, está válido
+
+    const espacoExiste = espacosAtuais.some(espaco => espaco.id === espacoCache.id);
+    if (!espacoExiste) {
+      console.warn('Espaço em cache não existe mais na base atual, limpando cache');
+      this.limparCache();
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Força uma nova consulta ignorando o cache
+   */
+  forcarNovaConsulta(): void {
+    this.limparCache();
+  }
 }
