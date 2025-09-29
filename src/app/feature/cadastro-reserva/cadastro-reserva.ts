@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReservaService } from '../../services/reserva.service';
 import { EspacoService } from '../../services/espaco.service';
+import { EspacoSelecionadoService } from '../../services/espaco-selecionado.service';
 import { Reserva } from '../../models/reserva.model';
 import { Espaco } from '../../models/espaco.model';
 
@@ -11,7 +12,7 @@ import { Espaco } from '../../models/espaco.model';
   selector: 'app-cadastro-reserva',
   imports: [CommonModule, FormsModule],
   templateUrl: './cadastro-reserva.html',
-  styleUrl: './cadastro-reserva.scss'
+  styleUrls: ['./cadastro-reserva.scss', '../../styles/espaco-selecionado.scss']
 })
 export class CadastroReserva implements OnInit {
 
@@ -43,6 +44,7 @@ export class CadastroReserva implements OnInit {
   constructor(
     private reservaService: ReservaService,
     private espacoService: EspacoService,
+    private espacoSelecionadoService: EspacoSelecionadoService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -65,11 +67,21 @@ export class CadastroReserva implements OnInit {
     try {
       const espacos = await this.espacoService.listarEspacos().toPromise();
       this.espacos.set(espacos || []);
+
+      // Definir o espaço selecionado automaticamente
+      const espacoSelecionado = this.espacoSelecionadoService.getEspacoSelecionado();
+      if (espacoSelecionado) {
+        this.reserva.espacoId = espacoSelecionado.id!;
+      }
     } catch (error) {
       console.error('Erro ao carregar espaços:', error);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  getEspacoSelecionado(): Espaco | null {
+    return this.espacoSelecionadoService.getEspacoSelecionado();
   }
 
   async carregarReservaParaEdicao(id: number) {

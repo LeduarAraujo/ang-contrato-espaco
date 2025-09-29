@@ -9,20 +9,17 @@
     <h2>{{ editando() ? 'Editar Tipo de Contrato' : 'Novo Tipo de Contrato' }}</h2>
     <form (ngSubmit)="salvarTipoContrato()" #tipoContratoForm="ngForm">
       <div class="form-row">
-        <div class="form-group">
-          <label for="espacoId">Espaço *</label>
-          <select
-            id="espacoId"
-            name="espacoId"
-            [(ngModel)]="novoTipoContrato.espacoId"
-            required
-            class="form-control"
-          >
-            <option value="0">Selecione um espaço</option>
-            <option *ngFor="let espaco of espacos()" [value]="espaco.id">
-              {{ espaco.nome }}
-            </option>
-          </select>
+        <div class="form-group" *ngIf="temEspacoSelecionado()">
+          <label>Espaço Selecionado</label>
+          <div class="espaco-selecionado-display">
+            <span class="espaco-nome">{{ getEspacoSelecionado()?.nome }}</span>
+          </div>
+          <small class="form-text">Para alterar o espaço, vá para a página inicial</small>
+        </div>
+
+        <div *ngIf="!temEspacoSelecionado()" class="alert alert-warning">
+          <strong>Atenção:</strong> Nenhum espaço foi selecionado.
+          <a href="/home" class="alert-link">Vá para a página inicial</a> para selecionar um espaço.
         </div>
 
         <div class="form-group">
@@ -103,7 +100,7 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="salvando() || !tipoContratoForm.form.valid"
+          [disabled]="salvando() || !tipoContratoForm.form.valid || !temEspacoSelecionado()"
         >
           <span *ngIf="salvando()">{{ editando() ? 'Atualizando...' : 'Salvando...' }}</span>
           <span *ngIf="!salvando()">{{ editando() ? 'Atualizar Tipo de Contrato' : 'Salvar Tipo de Contrato' }}</span>

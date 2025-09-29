@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ReservaService } from '../../services/reserva.service';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
+import { EspacoSelecionadoService } from '../../services/espaco-selecionado.service';
 import { Reserva } from '../../models/reserva.model';
 import { Espaco } from '../../models/espaco.model';
 import { TipoContrato } from '../../models/tipo-contrato.model';
@@ -12,7 +13,7 @@ import { TipoContrato } from '../../models/tipo-contrato.model';
   selector: 'app-consulta-festas',
   imports: [CommonModule, FormsModule],
   templateUrl: './consulta-festas.html',
-  styleUrl: './consulta-festas.scss'
+  styleUrls: ['./consulta-festas.scss', '../../styles/espaco-selecionado.scss']
 })
 export class ConsultaFestas implements OnInit {
 
@@ -27,18 +28,13 @@ export class ConsultaFestas implements OnInit {
   mostrarDatasDisponiveis = signal<boolean>(false);
   mostrarConsultaData = signal<boolean>(false);
 
-  // Filtros para festas da semana
-  espacoSelecionadoSemana = signal<number | null>(null);
-
   // Filtros para datas disponíveis
-  espacoSelecionadoDatas = signal<number | null>(null);
   dataInicio = signal<string>('');
   dataFim = signal<string>('');
   tipoDias = signal<'todos' | 'finais' | 'dias-semana'>('todos');
 
   // Consulta de data específica
   dataConsulta = signal<string>('');
-  espacoConsulta = signal<number | null>(null);
   reservaEncontrada = signal<Reserva | null>(null);
   loadingConsulta = signal<boolean>(false);
 
@@ -48,7 +44,8 @@ export class ConsultaFestas implements OnInit {
   constructor(
     private reservaService: ReservaService,
     private espacoService: EspacoService,
-    private tipoContratoService: TipoContratoService
+    private tipoContratoService: TipoContratoService,
+    private espacoSelecionadoService: EspacoSelecionadoService
   ) {}
 
   ngOnInit() {
@@ -86,6 +83,19 @@ export class ConsultaFestas implements OnInit {
     } catch (error) {
       console.error('Erro ao carregar tipos de contrato:', error);
     }
+  }
+
+  getEspacoSelecionado(): Espaco | null {
+    return this.espacoSelecionadoService.getEspacoSelecionado();
+  }
+
+  getLogoPreview(espaco: Espaco): string | null {
+    // Se tem logoData (base64), usar ele
+    if (espaco.logoData && espaco.logoMimeType) {
+      return `data:${espaco.logoMimeType};base64,${espaco.logoData}`;
+    }
+    // Senão, usar logoUrl se existir
+    return espaco.logoUrl || null;
   }
 
   // Método removido - não mais necessário na nova estrutura
@@ -457,20 +467,41 @@ export class ConsultaFestas implements OnInit {
 
   // Métodos para controle das seções
   alternarFestasSemana() {
-    this.mostrarFestasSemana.set(!this.mostrarFestasSemana());
+    const novoEstado = !this.mostrarFestasSemana();
+    this.mostrarFestasSemana.set(novoEstado);
+
+    // Se está abrindo, fecha as outras seções
+    if (novoEstado) {
+      this.mostrarDatasDisponiveis.set(false);
+      this.mostrarConsultaData.set(false);
+    }
   }
 
   alternarDatasDisponiveis() {
-    this.mostrarDatasDisponiveis.set(!this.mostrarDatasDisponiveis());
+    const novoEstado = !this.mostrarDatasDisponiveis();
+    this.mostrarDatasDisponiveis.set(novoEstado);
+
+    // Se está abrindo, fecha as outras seções
+    if (novoEstado) {
+      this.mostrarFestasSemana.set(false);
+      this.mostrarConsultaData.set(false);
+    }
   }
 
   alternarConsultaData() {
-    this.mostrarConsultaData.set(!this.mostrarConsultaData());
+    const novoEstado = !this.mostrarConsultaData();
+    this.mostrarConsultaData.set(novoEstado);
+
+    // Se está abrindo, fecha as outras seções
+    if (novoEstado) {
+      this.mostrarFestasSemana.set(false);
+      this.mostrarDatasDisponiveis.set(false);
+    }
   }
 
   // Consultar data específica
   async consultarData() {
-    if (!this.dataConsulta() || !this.espacoConsulta()) {
+    if (!this.dataConsulta() || !this.getEspacoSelecionado()) {
       alert('Por favor, selecione uma data e um espaço.');
       return;
     }
@@ -488,7 +519,7 @@ export class ConsultaFestas implements OnInit {
       // Filtrar pela data e espaço específicos
       const reserva = reservas?.find(r =>
         r.dataFesta === this.dataConsulta() &&
-        r.espacoId === Number(this.espacoConsulta())
+        r.espacoId === this.getEspacoSelecionado()!.id
       );
 
       this.reservaEncontrada.set(reserva || null);
@@ -506,25 +537,26 @@ export class ConsultaFestas implements OnInit {
 
   // Obter festas da semana por espaço selecionado
   getFestasSemanaPorEspaco(): Reserva[] {
-    if (!this.espacoSelecionadoSemana()) {
+    const espacoSelecionado = this.getEspacoSelecionado();
+    if (!espacoSelecionado) {
       return [];
     }
 
     const festasDaSemana = this.filtrarFestasDaSemana(this.reservas());
     return festasDaSemana.filter(reserva =>
-      reserva.espacoId === Number(this.espacoSelecionadoSemana())
+      reserva.espacoId === espacoSelecionado.id
     );
   }
 
   // Obter datas disponíveis por espaço selecionado
   getDatasDisponiveisPorEspacoSelecionado(): string[] {
-    if (!this.espacoSelecionadoDatas()) {
+    if (!this.getEspacoSelecionado()) {
       return [];
     }
 
     const todasAsDatasArray = this.getDatasDisponiveisPorEspaco();
     const todasAsDatas = todasAsDatasArray
-      .find(item => item.espaco.id === Number(this.espacoSelecionadoDatas()));
+      .find(item => item.espaco.id === this.getEspacoSelecionado()!.id);
 
     return todasAsDatas?.datas || [];
   }
@@ -535,14 +567,12 @@ export class ConsultaFestas implements OnInit {
     return espaco ? espaco.nome : 'Espaço não encontrado';
   }
 
-  // Métodos auxiliares para o template
-  getEspacoSelecionadoSemana(): Espaco | undefined {
-    return this.espacos().find(e => e.id === this.espacoSelecionadoSemana());
+  getNomeEspacoSelecionado(): string {
+    const espacoSelecionado = this.getEspacoSelecionado();
+    return espacoSelecionado ? espacoSelecionado.nome : 'Espaço não encontrado';
   }
 
-  getEspacoSelecionadoDatas(): Espaco | undefined {
-    return this.espacos().find(e => e.id === this.espacoSelecionadoDatas());
-  }
+  // Métodos auxiliares para o template
 
   copiarFestasSemana() {
     // Simplesmente copia as festas que estão sendo exibidas no grid

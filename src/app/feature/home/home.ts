@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
 import { ReservaService } from '../../services/reserva.service';
+import { EspacoSelecionadoService } from '../../services/espaco-selecionado.service';
 import { Reserva } from '../../models/reserva.model';
+import { Espaco } from '../../models/espaco.model';
 
 @Component({
   selector: 'app-home',
@@ -15,10 +17,12 @@ import { Reserva } from '../../models/reserva.model';
 })
 export class Home implements OnInit {
   // Signals para os dados reais
-  espacosCount = signal<number>(0);
   tiposContratoCount = signal<number>(0);
-  reservasCount = signal<number>(0);
   loading = signal<boolean>(true);
+
+  // Signals para espaços
+  espacos = signal<Espaco[]>([]);
+  espacosLoading = signal<boolean>(true);
 
   // Signals para festas do dia
   festasHoje = signal<FestaHoje[]>([]);
@@ -29,11 +33,13 @@ export class Home implements OnInit {
     private router: Router,
     private espacoService: EspacoService,
     private tipoContratoService: TipoContratoService,
-    private reservaService: ReservaService
+    private reservaService: ReservaService,
+    private espacoSelecionadoService: EspacoSelecionadoService
   ) {}
 
   ngOnInit() {
     this.carregarDados();
+    this.carregarEspacos();
   }
 
   async carregarDados() {
@@ -47,26 +53,33 @@ export class Home implements OnInit {
       ]);
 
       // Atualizar os contadores
-      this.espacosCount.set(espacos?.length || 0);
       this.tiposContratoCount.set(tiposContrato?.length || 0);
-      this.reservasCount.set(reservas?.length || 0);
 
       // Carregar festas do dia
       await this.carregarFestasHoje(reservas || [], espacos || []);
 
       console.log('Dados carregados:', {
-        espacos: this.espacosCount(),
-        tiposContrato: this.tiposContratoCount(),
-        reservas: this.reservasCount()
+        tiposContrato: this.tiposContratoCount()
       });
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       // Em caso de erro, manter valores padrão
-      this.espacosCount.set(0);
       this.tiposContratoCount.set(0);
-      this.reservasCount.set(0);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async carregarEspacos() {
+    this.espacosLoading.set(true);
+    try {
+      const espacos = await this.espacoService.listarEspacos().toPromise();
+      this.espacos.set(espacos || []);
+    } catch (error) {
+      console.error('Erro ao carregar espaços:', error);
+      this.espacos.set([]);
+    } finally {
+      this.espacosLoading.set(false);
     }
   }
 
@@ -117,6 +130,23 @@ export class Home implements OnInit {
     this.router.navigate(['/lista-reservas']);
   }
 
+  // Função para selecionar um espaço
+  selecionarEspaco(espaco: Espaco) {
+    this.espacoSelecionadoService.selecionarEspaco(espaco);
+    console.log('Espaço selecionado:', espaco.nome);
+  }
+
+  // Função para obter o espaço selecionado
+  getEspacoSelecionado(): Espaco | null {
+    return this.espacoSelecionadoService.getEspacoSelecionado();
+  }
+
+  // Função para verificar se um espaço está selecionado
+  isEspacoSelecionado(espaco: Espaco): boolean {
+    const espacoSelecionado = this.getEspacoSelecionado();
+    return espacoSelecionado?.id === espaco.id;
+  }
+
 
   // Métodos para festas do dia
   getFestasHoje(): FestaHoje[] {
@@ -144,6 +174,15 @@ export class Home implements OnInit {
       style: 'currency',
       currency: 'BRL'
     }).format(valor);
+  }
+
+  getLogoPreview(espaco: Espaco): string | null {
+    // Se tem logoData (base64), usar ele
+    if (espaco.logoData && espaco.logoMimeType) {
+      return `data:${espaco.logoMimeType};base64,${espaco.logoData}`;
+    }
+    // Senão, usar logoUrl se existir
+    return espaco.logoUrl || null;
   }
 }
 

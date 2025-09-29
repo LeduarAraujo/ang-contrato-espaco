@@ -256,6 +256,28 @@
   }
 }
 
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes menuSlideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .navbar {
   animation: slideInFromTop 0.6s ease-out;
 }
@@ -326,8 +348,9 @@
 @media (max-width: 768px) {
   .navbar-container {
     height: 60px;
-    padding: 0 16px;
-  }
+    padding: 0 16px
+}
+
 
   .brand-text {
     font-size: 18px;
@@ -337,6 +360,26 @@
     width: 36px;
     height: 36px;
   }
+
+  // Espaço selecionado no centro
+  .espaco-selecionado {
+    justify-self: center;
+    margin: 0;
+
+    // Centralizar dropdown no mobile
+    .espaco-dropdown {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%) translateY(-10px);
+      min-width: 200px;
+
+      &.open {
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+  }
+
+
 }
 
 @media (max-width: 600px) {
@@ -354,10 +397,29 @@
 @media (max-width: 480px) {
   .navbar-container {
     padding: 0 12px;
+    gap: 12px;
   }
 
   .brand-text {
     display: none;
+  }
+
+  // Ajustar espaço selecionado para telas muito pequenas
+  .espaco-selecionado {
+    .espaco-info {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    .espaco-logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .espaco-nome {
+      font-size: 14px;
+      max-width: 120px;
+    }
   }
 
   .nav-item .nav-link {
@@ -368,5 +430,322 @@
   .nav-item .nav-link svg {
     width: 12px; // Ícones mínimos
     height: 12px;
+  }
+}
+
+// Estilos para espaço selecionado na navbar
+.espaco-selecionado {
+  position: relative;
+  margin-left: auto;
+  margin-right: 60px;
+  cursor: pointer;
+
+  .espaco-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+  }
+
+  .espaco-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-placeholder {
+      color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .espaco-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .espaco-nome {
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .dropdown-arrow {
+    color: rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 8px;
+
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// Estilos para o dropdown
+.espaco-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  &.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-header {
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #e2e8f0;
+
+    span {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .dropdown-content {
+    padding: 8px 0;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #374151;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+
+    svg {
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-weight: 500;
+      font-size: 14px;
+    }
+  }
+
+  // Estilos específicos para itens de espaço
+  .espaco-item {
+    &.selecionado {
+      background-color: #e6f3ff;
+      border-left: 3px solid #3b82f6;
+    }
+
+    &:hover {
+      background-color: #f1f5f9;
+    }
+  }
+
+  .espaco-logo-mini {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-placeholder-mini {
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .espaco-info-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .espaco-nome-mini {
+    font-weight: 500;
+    font-size: 14px;
+    color: #2d3748;
+  }
+
+  .espaco-selecionado-badge {
+    font-size: 11px;
+    color: #3b82f6;
+    font-weight: 600;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 6px;
+    border-radius: 8px;
+    align-self: flex-start;
+  }
+
+  // Loading
+  .dropdown-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    color: #6b7280;
+    font-size: 14px;
+
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  // Estado vazio
+  .dropdown-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 16px;
+    color: #9ca3af;
+    text-align: center;
+
+    svg {
+      color: #d1d5db;
+    }
+
+    span {
+      font-size: 14px;
+    }
+  }
+
+  // Separador
+  .dropdown-separator {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 8px 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsividade para espaço selecionado
+@media (max-width: 768px) {
+  .espaco-selecionado {
+    margin-left: auto;
+    margin-right: 10px;
+
+    .espaco-info {
+      padding: 8px 12px;
+      gap: 8px;
+    }
+
+    .espaco-logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .espaco-nome {
+      font-size: 14px;
+      max-width: 180px;
+    }
+
+    .espaco-dropdown {
+      min-width: 200px;
+      right: -10px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .espaco-selecionado {
+    margin-left: auto;
+    margin-right: 5px;
+
+    .espaco-info {
+      padding: 6px 10px;
+      gap: 6px;
+    }
+
+    .espaco-logo {
+      width: 28px;
+      height: 28px;
+    }
+
+    .espaco-nome {
+      font-size: 12px;
+      max-width: 150px;
+    }
+
+    .espaco-dropdown {
+      min-width: 180px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%) translateY(-10px);
+
+      &.open {
+        transform: translateX(-50%) translateY(0);
+      }
+    }
   }
 }

@@ -7,24 +7,38 @@
   <div class="form-container">
     <form (ngSubmit)="salvarReserva()" #reservaForm="ngForm">
 
-      <!-- Seleção do Espaço -->
-      <div class="form-group">
-        <label for="espacoId" class="required">Espaço</label>
-        <select
-          id="espacoId"
-          name="espacoId"
-          [(ngModel)]="reserva.espacoId"
-          class="form-control"
-          [class.error]="erros()['espacoId']"
-          required
-        >
-          <option value="0">Selecione um espaço</option>
-          <option *ngFor="let espaco of espacos()" [value]="espaco.id">
-            {{ espaco.nome }}
-          </option>
-        </select>
-        <div *ngIf="erros()['espacoId']" class="error-message">
-          {{ erros()['espacoId'] }}
+      <!-- Espaço Selecionado -->
+      <div class="form-group" *ngIf="getEspacoSelecionado()">
+        <label>Espaço Selecionado</label>
+        <div class="espaco-selecionado-display">
+          <div class="espaco-logo">
+            <img *ngIf="getEspacoSelecionado()?.logoUrl"
+                 [src]="getEspacoSelecionado()?.logoUrl"
+                 [alt]="getEspacoSelecionado()?.nome"
+                 [title]="getEspacoSelecionado()?.nome" />
+            <div *ngIf="!getEspacoSelecionado()?.logoUrl" class="logo-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 16V8C20.9996 7.64927 20.9071 7.30481 20.7315 7.00116C20.556 6.69751 20.3037 6.44536 20 6.27L13 2.27C12.696 2.09446 12.3511 2.00205 12 2.00205C11.6489 2.00205 11.304 2.09446 11 2.27L4 6.27C3.69626 6.44536 3.44398 6.69751 3.26846 7.00116C3.09294 7.30481 3.00036 7.64927 3 8V16C3.00036 16.3507 3.09294 16.6952 3.26846 16.9988C3.44398 17.3025 3.69626 17.5546 4 17.73L11 21.73C11.304 21.9055 11.6489 21.9979 12 21.9979C12.3511 21.9979 12.696 21.9055 13 21.73L20 17.73C20.3037 17.5546 20.556 17.3025 20.7315 16.9988C20.9071 16.6952 20.9996 16.3507 21 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3.27 6.96L12 12.01L20.73 6.96" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 22.08V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <span class="espaco-nome">{{ getEspacoSelecionado()?.nome }}</span>
+        </div>
+        <small class="form-text">Para alterar o espaço, vá para a página inicial</small>
+      </div>
+
+      <div *ngIf="!getEspacoSelecionado()" class="alert alert-warning">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10.29 3.86L1.82 18C1.64564 18.3024 1.5729 18.6453 1.61286 18.9873C1.65282 19.3293 1.80434 19.6507 2.04436 19.8999C2.28438 20.1491 2.60053 20.3123 2.94411 20.3645C3.28769 20.4167 3.6409 20.3552 3.95 20.19L12 16.27L20.05 20.19C20.3591 20.3552 20.7123 20.4167 21.0559 20.3645C21.3995 20.3123 21.7156 20.1491 21.9556 19.8999C22.1957 19.6507 22.3472 19.3293 22.3871 18.9873C22.4271 18.6453 22.3544 18.3024 22.18 18L13.71 3.86C13.5318 3.56631 13.2807 3.32312 12.9812 3.15447C12.6817 2.98582 12.3438 2.89725 12 2.89725C11.6562 2.89725 11.3183 2.98582 11.0188 3.15447C10.7193 3.32312 10.4682 3.56631 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <strong>Nenhum espaço selecionado</strong>
+          <p>Você precisa selecionar um espaço na página inicial antes de cadastrar uma reserva.</p>
+          <a routerLink="/home" class="btn btn-primary btn-sm">Ir para Home</a>
         </div>
       </div>
 

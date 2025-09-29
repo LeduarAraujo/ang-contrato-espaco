@@ -161,18 +161,38 @@
 }
 
 .festas-list {
-  h4 {
-    color: #2d3748;
-    margin-bottom: 16px;
-    font-size: 1.125rem;
+  // Grid layout para múltiplos cards por linha
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+
+  // Responsividade
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+// Estilo para o título das festas (fora do grid)
+h4 {
+  color: #2d3748;
+  margin-bottom: 16px;
+  font-size: 1.125rem;
+}
+
+.mrtop{
+  margin-top: 16px;
 }
 
 .festa-item {
   background: #f7fafc;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 12px;
   border-left: 4px solid #667eea;
 
   .festa-info {

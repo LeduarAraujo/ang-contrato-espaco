@@ -19,19 +19,26 @@
     </div>
 
     <div class="filters-grid">
-      <!-- Filtro por Espaço -->
-      <div class="filter-group">
-        <label for="filtroEspaco">Espaço</label>
-        <select
-          id="filtroEspaco"
-          [(ngModel)]="filtroEspaco"
-          class="form-control"
-        >
-          <option [value]="null">Todos os espaços</option>
-          <option *ngFor="let espaco of espacos()" [value]="espaco.id!.toString()">
-            {{ espaco.nome }}
-          </option>
-        </select>
+      <!-- Espaço Selecionado -->
+      <div class="filter-group" *ngIf="getEspacoSelecionado()">
+        <label>Espaço Selecionado</label>
+        <div class="espaco-selecionado-display">
+          <span class="espaco-nome">{{ getEspacoSelecionado()?.nome }}</span>
+        </div>
+        <small class="form-text">Para alterar o espaço, vá para a página inicial</small>
+      </div>
+
+      <div *ngIf="!getEspacoSelecionado()" class="alert alert-warning">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10.29 3.86L1.82 18C1.64564 18.3024 1.5729 18.6453 1.61286 18.9873C1.65282 19.3293 1.80434 19.6507 2.04436 19.8999C2.28438 20.1491 2.60053 20.3123 2.94411 20.3645C3.28769 20.4167 3.6409 20.3552 3.95 20.19L12 16.27L20.05 20.19C20.3591 20.3552 20.7123 20.4167 21.0559 20.3645C21.3995 20.3123 21.7156 20.1491 21.9556 19.8999C22.1957 19.6507 22.3472 19.3293 22.3871 18.9873C22.4271 18.6453 22.3544 18.3024 22.18 18L13.71 3.86C13.5318 3.56631 13.2807 3.32312 12.9812 3.15447C12.6817 2.98582 12.3438 2.89725 12 2.89725C11.6562 2.89725 11.3183 2.98582 11.0188 3.15447C10.7193 3.32312 10.4682 3.56631 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <strong>Nenhum espaço selecionado</strong>
+          <p>Você precisa selecionar um espaço na página inicial para visualizar as reservas.</p>
+          <a routerLink="/home" class="btn btn-primary btn-sm">Ir para Home</a>
+        </div>
       </div>
 
       <!-- Filtro por Mês -->

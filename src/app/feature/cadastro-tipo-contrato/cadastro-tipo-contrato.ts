@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
 import { FocusService } from '../../services/focus.service';
+import { EspacoSelecionadoService } from '../../services/espaco-selecionado.service';
 import { Espaco } from '../../models/espaco.model';
 import { TipoContrato } from '../../models/tipo-contrato.model';
 
@@ -15,7 +16,6 @@ import { TipoContrato } from '../../models/tipo-contrato.model';
 })
 export class CadastroTipoContrato implements OnInit {
 
-  espacos = signal<Espaco[]>([]);
   tiposContrato = signal<TipoContrato[]>([]);
   loading = signal<boolean>(false);
   salvando = signal<boolean>(false);
@@ -46,23 +46,14 @@ export class CadastroTipoContrato implements OnInit {
   constructor(
     private espacoService: EspacoService,
     private tipoContratoService: TipoContratoService,
-    private focusService: FocusService
+    private focusService: FocusService,
+    private espacoSelecionadoService: EspacoSelecionadoService
   ) {}
 
   ngOnInit() {
-    this.carregarEspacos();
     this.carregarTiposContrato();
   }
 
-  async carregarEspacos() {
-    try {
-      const espacos = await this.espacoService.listarEspacos().toPromise();
-      this.espacos.set(espacos || []);
-    } catch (error) {
-      console.error('Erro ao carregar espaços:', error);
-      console.error('Erro ao carregar espaços. Verifique se o backend está rodando.');
-    }
-  }
 
   async carregarTiposContrato() {
     this.loading.set(true);
@@ -95,10 +86,14 @@ export class CadastroTipoContrato implements OnInit {
   }
 
   async salvarTipoContrato() {
-    if (!this.novoTipoContrato.espacoId) {
-      console.warn('Selecione um espaço');
+    const espacoSelecionado = this.espacoSelecionadoService.getEspacoSelecionado();
+    if (!espacoSelecionado) {
+      alert('Por favor, selecione um espaço na página inicial.');
       return;
     }
+
+    // Usar o espaço selecionado globalmente
+    this.novoTipoContrato.espacoId = espacoSelecionado.id!;
 
     if (!this.novoTipoContrato.titulo.trim()) {
       console.warn('Título é obrigatório');
@@ -165,8 +160,11 @@ export class CadastroTipoContrato implements OnInit {
   }
 
   getEspacoNome(espacoId: number): string {
-    const espaco = this.espacos().find(e => e.id === espacoId);
-    return espaco ? espaco.nome : 'Espaço não encontrado';
+    const espacoSelecionado = this.espacoSelecionadoService.getEspacoSelecionado();
+    if (espacoSelecionado && espacoSelecionado.id === espacoId) {
+      return espacoSelecionado.nome;
+    }
+    return 'Espaço não encontrado';
   }
 
   // Método para editar tipo de contrato
@@ -204,8 +202,9 @@ export class CadastroTipoContrato implements OnInit {
 
   // Método para limpar formulário
   private limparFormulario() {
+    const espacoSelecionado = this.espacoSelecionadoService.getEspacoSelecionado();
     this.novoTipoContrato = {
-      espacoId: 0,
+      espacoId: espacoSelecionado?.id || 0,
       tipo: 'CONTRATO',
       titulo: '',
       descricao: '',
@@ -217,6 +216,15 @@ export class CadastroTipoContrato implements OnInit {
 
   // Método para focar no primeiro campo do formulário
   private focarPrimeiroCampo() {
-    this.focusService.focusElement('espacoId');
+    this.focusService.focusElement('tipo');
+  }
+
+  // Métodos para acessar o espaço selecionado no template
+  getEspacoSelecionado() {
+    return this.espacoSelecionadoService.getEspacoSelecionado();
+  }
+
+  temEspacoSelecionado() {
+    return this.espacoSelecionadoService.temEspacoSelecionado();
   }
 }

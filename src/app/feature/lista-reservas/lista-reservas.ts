@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ReservaService } from '../../services/reserva.service';
 import { EspacoService } from '../../services/espaco.service';
 import { TipoContratoService } from '../../services/tipo-contrato.service';
+import { EspacoSelecionadoService } from '../../services/espaco-selecionado.service';
 import { Reserva } from '../../models/reserva.model';
 import { Espaco } from '../../models/espaco.model';
 import { TipoContrato } from '../../models/tipo-contrato.model';
@@ -13,7 +14,7 @@ import { TipoContrato } from '../../models/tipo-contrato.model';
   selector: 'app-lista-reservas',
   imports: [CommonModule, FormsModule],
   templateUrl: './lista-reservas.html',
-  styleUrl: './lista-reservas.scss'
+  styleUrls: ['./lista-reservas.scss', '../../styles/espaco-selecionado.scss']
 })
 export class ListaReservas implements OnInit {
 
@@ -36,6 +37,7 @@ export class ListaReservas implements OnInit {
     private reservaService: ReservaService,
     private espacoService: EspacoService,
     private tipoContratoService: TipoContratoService,
+    private espacoSelecionadoService: EspacoSelecionadoService,
     private router: Router
   ) {}
 
@@ -75,12 +77,17 @@ export class ListaReservas implements OnInit {
     }
   }
 
+  getEspacoSelecionado(): Espaco | null {
+    return this.espacoSelecionadoService.getEspacoSelecionado();
+  }
+
   getReservasFiltradas(): Reserva[] {
     let reservas = this.reservas();
 
-    // Filtro por espaço
-    if (this.filtroEspaco() && this.filtroEspaco() !== null && this.filtroEspaco() !== 'null') {
-      reservas = this.filtrarPorEspaco(reservas, this.filtroEspaco()!);
+    // Filtro por espaço selecionado
+    const espacoSelecionado = this.getEspacoSelecionado();
+    if (espacoSelecionado) {
+      reservas = this.filtrarPorEspaco(reservas, espacoSelecionado.id!);
     }
 
     // Filtro por mês
